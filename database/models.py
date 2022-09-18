@@ -3,8 +3,8 @@ from sqlalchemy import Column, Integer, BigInteger, Text, Boolean
 from loader import Base, engine
 
 
-class User(Base):
-    __tablename__ = 'users'
+class Post(Base):
+    __tablename__ = 'posts'
 
     post_id = Column('post_id', Integer, primary_key=True)
     owner_id = Column('owner_id', Integer)
