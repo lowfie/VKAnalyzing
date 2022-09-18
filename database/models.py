@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Text, Boolean
 
-from base import Base, Engine
+from loader import Base, Engine
 
 
 class Users(Base):
