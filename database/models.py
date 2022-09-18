@@ -21,7 +21,7 @@ class Comment(Base):
 
     comment_id = Column('comment_id', Integer, primary_key=True)
     post_id = Column('post_id', Integer)
-    comment_text = Column('text', Integer)
+    text = Column('text', Text)
 
 
 def create_db():
