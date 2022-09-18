@@ -1,5 +1,6 @@
 from aiogram import executor
 from loader import dp
+import handlers
 
 
 async def on_startup(dispatcher):
