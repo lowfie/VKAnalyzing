@@ -21,57 +21,64 @@ class Post(Base):
     def add_post(post_data):
         """
         Функция принимает словарь с данными поста
-        и добавляет эти данные бд, если они уже записаны,
-        то функция обновляет их
+        и добавляет эти данные бд, если их не существует
         """
-        if session.query(Post).filter(Post.post_id == post_data['id']).first() is None:
-            post = Post(
-                post_id=post_data['id'],
-                owner_id=post_data['owner_id'],
-                group=post_data['group'],
-                quantity_comments=post_data['quantity_comments'],
-                likes=post_data['likes'],
-                views=post_data['views'],
-                photo=post_data['photo'],
-                post_text=post_data['text']
-            )
-            session.add(post)
-            session.commit()
-        else:
-            post = session.query(Post).first()
-            post.quantity_comments = post_data['quantity_comments']
-            post.likes = post_data['likes']
-            post.views = post_data['views']
-            session.commit()
+        post = Post(
+            post_id=post_data['id'],
+            owner_id=post_data['owner_id'],
+            group=post_data['group'],
+            quantity_comments=post_data['quantity_comments'],
+            likes=post_data['likes'],
+            views=post_data['views'],
+            photo=post_data['photo'],
+            post_text=post_data['text']
+        )
+        session.add(post)
+        session.commit()
+
+    @staticmethod
+    def update_post(post_data):
+        """
+        Функция принимает словарь с данными
+        и обновляет их
+        """
+        post = session.query(Post).first()
+        post.quantity_comments = post_data['quantity_comments']
+        post.likes = post_data['likes']
+        post.views = post_data['views']
+        session.commit()
 
 
 class Comment(Base):
     __tablename__ = 'comments'
 
     comment_id = Column('comment_id', Integer, primary_key=True)
-    post_id = Column(Integer, ForeignKey('posts.post_id'))
+    post_id = Column(Integer, ForeignKey('posts.post_id'), nullable=False)
     text = Column('text', Text)
 
     @staticmethod
     def add_comment(comment_data):
         """
         Функция принимает словарь метаданных комментария
-        И добавляет в бд, если его нет, если есть, то
-        обновляет текст комментария
+        И добавляет в бд
         """
-        print(comment_data)
-        if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
-            comment = Comment(
-                comment_id=comment_data['comment_id'],
-                post_id=comment_data['post_id'],
-                text=comment_data['text']
-            )
-            session.add(comment)
-            session.commit()
-        else:
-            comment = session.query(Comment).first()
-            comment.text = comment_data['text']
-            session.commit()
+        comment = Comment(
+            comment_id=comment_data['comment_id'],
+            post_id=comment_data['post_id'],
+            text=comment_data['text']
+        )
+        session.add(comment)
+        session.commit()
+
+    @staticmethod
+    def update_comment(comment_data):
+        """
+        Функция принимает на вход метаданные комментария
+        и обновляет их
+        """
+        comment = session.query(Comment).first()
+        comment.text = comment_data['text']
+        session.commit()
 
 
 def create_db():
