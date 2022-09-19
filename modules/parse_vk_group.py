@@ -1,9 +1,8 @@
-import time
-
 from data.config import VK_TOKEN
 import requests
 
 from database.models import Post, Comment, create_db
+from loader import session
 
 group_name = input('Введите название группы: ')
 
@@ -27,6 +26,8 @@ class VkParser:
         for item in items:
             self.posts_metadata.append({'post_id': item['id'], 'owner_id': item['owner_id']})
             # Добавление данных в бд
+
+            # Попробовать добавить bulk_insert_mappings (Оптимизация)
             post_data = {
                 'id': item['id'],
                 'owner_id': item['owner_id'],
@@ -37,7 +38,11 @@ class VkParser:
                 'photo': True if 'attachments' in item else False,
                 'text': item['text']
             }
-            Post.add_post(post_data)
+
+            if session.query(Post).filter(Post.post_id == post_data['id']).first() is None:
+                Post.add_post(post_data)
+            else:
+                Post.update_post(post_data)
 
     def get_wall_comments(self):
         """
@@ -49,7 +54,6 @@ class VkParser:
                               f'&count=100&sort=desc&access_token={VK_TOKEN}&{self.vk_version}'
             response = requests.get(link).json()
 
-            print(response)
             # Обход ограничение на 5 запросов в секунду
             # if num % 5 == 0:
             #     time.sleep(2)
@@ -61,8 +65,10 @@ class VkParser:
                     'post_id': post['post_id'],
                     'text': item['text']
                 }
-                print(comment_data)
-                Comment.add_comment(comment_data)
+                if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
+                    Comment.add_comment(comment_data)
+                else:
+                    Comment.update_comment(comment_data)
 
     def main(self):
         self.get_posts()
