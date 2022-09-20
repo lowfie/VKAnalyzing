@@ -1,5 +1,7 @@
+import time
+
 from data.config import VK_TOKEN
-import requests
+import httpx
 
 from database.models import Post, Comment, create_tables
 from loader import session
@@ -19,14 +21,14 @@ class VkParser:
         И занесение данных в бд
         """
         link = self.url + f'wall.get?domain={group_name}&count=40&access_token={VK_TOKEN}&{self.vk_version}'
-        response = requests.get(link).json()
+        response = httpx.get(link).json()
+
         # Список из 40 последних постов
         items = [item for item in response['response']['items']]
 
         for item in items:
             self.posts_metadata.append({'post_id': item['id'], 'owner_id': item['owner_id']})
             # Добавление данных в бд
-
             # Попробовать добавить bulk_insert_mappings (Оптимизация)
             post_data = {
                 'id': item['id'],
@@ -38,7 +40,6 @@ class VkParser:
                 'photo': True if 'attachments' in item else False,
                 'text': item['text']
             }
-
             if session.query(Post).filter(Post.post_id == post_data['id']).first() is None:
                 Post.add_post(post_data)
             else:
@@ -52,8 +53,7 @@ class VkParser:
         for num, post in enumerate(self.posts_metadata, start=1):
             link = self.url + f'wall.getComments?owner_id={post["owner_id"]}&post_id={post["post_id"]}' \
                               f'&count=100&sort=desc&access_token={VK_TOKEN}&{self.vk_version}'
-            response = requests.get(link).json()
-
+            response = httpx.get(link).json()
             # Обход ограничение на 5 запросов в секунду
             # if num % 5 == 0:
             #     time.sleep(2)
