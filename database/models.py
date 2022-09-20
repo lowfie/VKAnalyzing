@@ -42,7 +42,7 @@ class Post(Base):
         Функция принимает словарь с данными
         и обновляет их
         """
-        post = session.query(Post).first()
+        post = session.query(Post).filter(Post.post_id == post_data['id']).first()
         post.quantity_comments = post_data['quantity_comments']
         post.likes = post_data['likes']
         post.views = post_data['views']
@@ -76,7 +76,7 @@ class Comment(Base):
         Функция принимает на вход метаданные комментария
         и обновляет их
         """
-        comment = session.query(Comment).first()
+        comment = session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first()
         comment.text = comment_data['text']
         session.commit()
 
