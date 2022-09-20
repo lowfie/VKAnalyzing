@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, BigInteger, Text, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
-from loader import Base, engine, session
+from loader import Base, engine
 
 
 class Post(Base):
