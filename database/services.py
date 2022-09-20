@@ -1,4 +1,4 @@
-from models import Post, Comment
+from database.models import Post, Comment
 from loader import session
 
 
