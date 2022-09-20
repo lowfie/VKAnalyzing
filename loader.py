@@ -8,7 +8,7 @@ from aiogram import Bot, Dispatcher
 
 # Создание сессии для коммуникации с бд
 engine = create_engine(f"postgresql://{USER_DB}:{PASSWORD_DB}@{HOST_PORT}/{DATABASE}")
-session = scoped_session(sessionmaker(bind=engine)) # Когда ставлю autocommit=True данные не сохраняются
+session = scoped_session(sessionmaker(bind=engine))
 
 # Создание моделей в бд
 Base = declarative_base()
