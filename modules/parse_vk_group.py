@@ -67,11 +67,11 @@ class VkParser:
                 if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
                     Service.add_comment(comment_data)
                 else:
-                    Service.update_post(comment_data)
+                    Service.update_comment(comment_data)
 
     def main(self):
         self.get_posts()
-        # self.get_wall_comments()
+        self.get_wall_comments()
 
 
 if __name__ == '__main__':
