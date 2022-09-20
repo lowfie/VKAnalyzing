@@ -1,9 +1,8 @@
-import time
-
 from data.config import VK_TOKEN
 import httpx
 
 from database.models import Post, Comment, create_tables
+from database import Service
 from loader import session
 
 group_name = input('Введите название группы: ')
@@ -41,9 +40,9 @@ class VkParser:
                 'text': item['text']
             }
             if session.query(Post).filter(Post.post_id == post_data['id']).first() is None:
-                Post.add_post(post_data)
+                Service.add_post(post_data)
             else:
-                Post.update_post(post_data)
+                Service.update_post(post_data)
 
     def get_wall_comments(self):
         """
@@ -66,13 +65,13 @@ class VkParser:
                     'text': item['text']
                 }
                 if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
-                    Comment.add_comment(comment_data)
+                    Service.add_comment(comment_data)
                 else:
-                    Comment.update_comment(comment_data)
+                    Service.update_post(comment_data)
 
     def main(self):
         self.get_posts()
-        self.get_wall_comments()
+        # self.get_wall_comments()
 
 
 if __name__ == '__main__':
