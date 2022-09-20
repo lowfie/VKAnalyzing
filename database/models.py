@@ -81,6 +81,6 @@ class Comment(Base):
         session.commit()
 
 
-def create_db():
+def create_tables():
     """Автоматическое создание моделей при запуске"""
     Base.metadata.create_all(bind=engine)
