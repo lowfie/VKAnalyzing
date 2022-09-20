@@ -1,7 +1,7 @@
 from data.config import VK_TOKEN
 import requests
 
-from database.models import Post, Comment, create_db
+from database.models import Post, Comment, create_tables
 from loader import session
 
 group_name = input('Введите название группы: ')
@@ -76,6 +76,6 @@ class VkParser:
 
 
 if __name__ == '__main__':
-    create_db()
+    create_tables()
     vk_parser = VkParser()
     vk_parser.main()
