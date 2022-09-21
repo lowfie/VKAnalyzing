@@ -2,6 +2,7 @@ import time
 
 from data.config import VK_TOKEN
 import httpx
+import asyncio
 
 from database.models import Post, Comment
 from database import Service
@@ -14,7 +15,7 @@ class VkParser:
         self.vk_version = 'v=5.131'
         self.posts_metadata = []
 
-    def get_posts(self, group):
+    async def get_posts(self, group):
         """
         Парсинг данных 40 последних постов из группы вк
         И занесение данных в бд
@@ -44,7 +45,7 @@ class VkParser:
             else:
                 Service.update_post(post_data)
 
-    def get_wall_comments(self):
+    async def get_wall_comments(self):
         """
         Парсинг комментариев поста
         И занесение данных в бд
@@ -55,8 +56,9 @@ class VkParser:
             response = httpx.get(link).json()
             # Обход ограничение на 5 запросов в секунду
             if num % 4 == 0:
-                time.sleep(2)
+                await asyncio.sleep(2)
 
+            print(response)
             for item in response['response']['items']:
                 if len(item['text'].split()) > 1:
                     # Добавление данных в бд
