@@ -5,7 +5,7 @@ import asyncio
 from datetime import datetime
 
 from database.models import Post, Comment
-from database import Service
+from database import PostService, CommentService
 from loader import session
 
 
@@ -22,6 +22,8 @@ class VkParser:
         """
         link = self.url + f'wall.get?domain={group}&count=40&access_token={VK_TOKEN}&{self.vk_version}'
         response = httpx.get(link).json()
+
+        service_post = PostService(Post)
 
         # Список из 40 последних постов
         items = [item for item in response['response']['items']]
@@ -42,15 +44,16 @@ class VkParser:
                 'date': datetime.fromtimestamp(item['date'])
             }
             if session.query(Post).filter(Post.post_id == post_data['id']).first() is None:
-                Service.add_post(post_data)
+                service_post.add(post_data)
             else:
-                Service.update_post(post_data)
+                service_post.update(post_data)
 
     async def get_wall_comments(self):
         """
         Парсинг комментариев поста
         И занесение данных в бд
         """
+        service_comment = CommentService(Comment)
         for num, post in enumerate(self.posts_metadata, start=1):
             link = self.url + f'wall.getComments?owner_id={post["owner_id"]}&post_id={post["post_id"]}' \
                               f'&count=100&sort=desc&access_token={VK_TOKEN}&{self.vk_version}'
@@ -69,9 +72,9 @@ class VkParser:
                             'text': item['text']
                         }
                         if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
-                            Service.add_comment(comment_data)
+                            service_comment.add(comment_data)
                         else:
-                            Service.update_comment(comment_data)
+                            service_comment.update(comment_data)
                 else:
                     continue
 

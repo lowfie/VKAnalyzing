@@ -1,1 +1,1 @@
-from .services import Service
+from .services import PostService, CommentService
