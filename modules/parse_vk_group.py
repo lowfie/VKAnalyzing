@@ -58,16 +58,18 @@ class VkParser:
             if num % 4 == 0:
                 await asyncio.sleep(2)
 
-            print(response)
-            for item in response['response']['items']:
-                if len(item['text'].split()) > 1:
-                    # Добавление данных в бд
-                    comment_data = {
-                        'comment_id': item['id'],
-                        'post_id': post['post_id'],
-                        'text': item['text']
-                    }
-                    if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
-                        Service.add_comment(comment_data)
-                    else:
-                        Service.update_comment(comment_data)
+            for item in response.get('response').get('items'):
+                if item is not None:
+                    if len(item['text'].split()) > 1:
+                        # Добавление данных в бд
+                        comment_data = {
+                            'comment_id': item['id'],
+                            'post_id': post['post_id'],
+                            'text': item['text']
+                        }
+                        if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
+                            Service.add_comment(comment_data)
+                        else:
+                            Service.update_comment(comment_data)
+                else:
+                    continue
