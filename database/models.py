@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, BigInteger, Text, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, BigInteger, Text, Boolean, Date, ForeignKey
 from sqlalchemy.orm import relationship
 
 from loader import Base, engine
@@ -15,6 +15,7 @@ class Post(Base):
     views = Column('views', BigInteger)
     photo = Column('photo', Boolean)
     post_text = Column('text', Text)
+    date = Column('date', Date)
     comment = relationship('Comment')
 
 

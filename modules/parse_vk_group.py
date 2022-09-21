@@ -2,6 +2,8 @@ from data.config import VK_TOKEN
 import httpx
 import asyncio
 
+from datetime import datetime
+
 from database.models import Post, Comment
 from database import Service
 from loader import session
@@ -36,7 +38,8 @@ class VkParser:
                 'likes': item['likes']['count'],
                 'views': item['views']['count'],
                 'photo': True if 'attachments' in item else False,
-                'text': item['text']
+                'text': item['text'],
+                'date': datetime.fromtimestamp(item['date'])
             }
             if session.query(Post).filter(Post.post_id == post_data['id']).first() is None:
                 Service.add_post(post_data)
