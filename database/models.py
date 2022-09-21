@@ -16,7 +16,7 @@ class Post(Base):
     photo = Column('photo', Boolean)
     post_text = Column('text', Text)
     date = Column('date', DateTime)
-    comment = relationship('Comment')
+    comment = relationship('Comment', lazy='select')
 
 
 class Comment(Base):
