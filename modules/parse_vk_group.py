@@ -1,5 +1,3 @@
-import time
-
 from data.config import VK_TOKEN
 import httpx
 import asyncio
@@ -73,3 +71,11 @@ class VkParser:
                             Service.update_comment(comment_data)
                 else:
                     continue
+
+    async def run_vk_parser(self, group):
+        tasks = [
+            self.get_posts(group),
+            self.get_wall_comments()
+        ]
+
+        await asyncio.gather(*tasks)

@@ -11,8 +11,7 @@ async def parser_metadata_group(message: types.Message):
 
     if len(text.split()) == 2:
         group = text.split()[1]
-        await parser_vk.get_posts(group)
-        await parser_vk.get_wall_comments()
+        await parser_vk.run_vk_parser(group)
     else:
         group = 'Попробуй ещё раз.'
 
