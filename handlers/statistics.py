@@ -36,12 +36,19 @@ async def load_period(message: types.Message, state: FSMContext):
 
     statistics = post_service.select(data)
 
+    if statistics:
+        text = f'За {data["date"]} дней выложено {statistics["count_post"]} постов' \
+                f'Посты с фото/видео: {statistics["posts_with_photo"]}\n' \
+                f'Лайки: {statistics["likes"]}\n' \
+                f'Всего просмотров: {statistics["likes"]}\n' \
+                f'Комментарии: {statistics["comments"]}'
+    else:
+        text = f'К сожалению группы {data["name"]} нету в базе\n' \
+               f'Вы можете её добавить написать /group <name>'
+
     await dp.bot.send_message(
         chat_id=message.chat.id,
-        text=f'Всего постов: {statistics["count_post"]}\n'
-             f'Посты с фото/видео: {statistics["posts_with_photo"]}\n'
-             f'Лайки: {statistics["likes"]}\n'
-             f'Комментарии: {statistics["comments"]}'
+        text=text
     )
 
     await state.finish()

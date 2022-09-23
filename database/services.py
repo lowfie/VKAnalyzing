@@ -54,39 +54,49 @@ class PostService:
         статистика
         """
 
-        # Количество постов за период
-        posts = session.query(self.post).filter(
-            self.post.group == input_data['name'],
-            self.post.date >= input_data['date']
-        ).count()
+        if session.query(self.post).filter(self.post.group == input_data['name']).first():
+            # Количество постов за период
+            posts = session.query(self.post).filter(
+                self.post.group == input_data['name'],
+                self.post.date >= input_data['date']
+            ).count()
 
-        # Количество постов с фото/видео за период
-        post_with_photo = session.query(self.post).filter(
-            self.post.group == input_data['name'],
-            self.post.date >= input_data['date'],
-            self.post.photo == 'true'
-        ).count()
+            # Количество постов с фото/видео за период
+            post_with_photo = session.query(self.post).filter(
+                self.post.group == input_data['name'],
+                self.post.date >= input_data['date'],
+                self.post.photo == 'true'
+            ).count()
 
-        # Количество лайков со всех постов за период
-        likes = session.query(func.sum(self.post.likes)).filter(
-            self.post.group == input_data['name'],
-            self.post.date >= input_data['date'],
-        ).scalar()
+            # Количество лайков со всех постов за период
+            likes = session.query(func.sum(self.post.likes)).filter(
+                self.post.group == input_data['name'],
+                self.post.date >= input_data['date'],
+            ).scalar()
 
-        # Количество комментариев с постов
-        comments = session.query(func.sum(self.post.quantity_comments)).filter(
-            self.post.group == input_data['name'],
-            self.post.date >= input_data['date'],
-        ).scalar()
+            # Количество просмотров со всех постов за период
+            views = session.query(func.sum(self.post.views)).filter(
+                self.post.group == input_data['name'],
+                self.post.date >= input_data['date'],
+            ).scalar()
 
-        output_data = {
-            'count_post': posts,
-            'posts_with_photo': post_with_photo,
-            'likes': likes,
-            'comments': comments
-        }
+            # Количество комментариев с постов
+            comments = session.query(func.sum(self.post.quantity_comments)).filter(
+                self.post.group == input_data['name'],
+                self.post.date >= input_data['date'],
+            ).scalar()
 
-        return output_data
+            output_data = {
+                'count_post': posts,
+                'posts_with_photo': post_with_photo,
+                'likes': likes,
+                'views': views,
+                'comments': comments
+            }
+
+            return output_data
+        else:
+            return False
 
 
 class CommentService:
