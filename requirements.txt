@@ -1,0 +1,4 @@
+environs~=9.5.0
+aiogram~=2.22.1
+httpx~=0.23.0
+SQLAlchemy~=1.4.41
