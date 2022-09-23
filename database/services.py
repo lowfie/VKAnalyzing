@@ -50,8 +50,8 @@ class PostService:
     def select(self, input_data: dict):
         """
         Функция принимает словарь со значениями
-        периода времени и группы, этим данным возвращается
-        статистика
+        периода времени и группы
+        Далее функция возвращает словарь со статистика
         """
 
         if session.query(self.post).filter(self.post.group == input_data['name']).first():
