@@ -1,4 +1,6 @@
 from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from loader import dp
 
 from datetime import datetime, timedelta
@@ -7,20 +9,30 @@ from database import PostService
 from database.models import Post
 
 
-@dp.message_handler(commands='stats')
-async def get_stats(message: types.Message):
+class FSMDate(StatesGroup):
+    name = State()
+    days = State()
+
+
+@dp.message_handler(commands='stats',state=None)
+async def cm_stats(message: types.Message):
+    await FSMDate.name.set()
+    await message.reply('Введите название группы из ссылки')
+
+
+@dp.message_handler(state=FSMDate.name, content_types=['text'])
+async def load_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['name'] = str(message.text)
+    await message.reply('Введите период подсчёта статистики в днях')
+    await FSMDate.next()
+
+
+@dp.message_handler(state=FSMDate.days, content_types=['text'])
+async def load_period(message: types.Message, state: FSMContext):
     post_service = PostService(Post)
-
-    if len(message.text.split()) == 2:
-        name = message.text.split()[1]
-        print(name)
-    else:
-        name = ''
-
-    data = {
-        'name': name.strip(),
-        'date': datetime.now() - timedelta(weeks=1000),
-    }
+    async with state.proxy() as data:
+        data['date'] = datetime.now() - timedelta(days=int(message.text))
 
     statistics = post_service.select(data)
 
@@ -31,3 +43,5 @@ async def get_stats(message: types.Message):
              f'Лайки: {statistics["likes"]}\n'
              f'Комментарии: {statistics["comments"]}'
     )
+
+    await state.finish()
