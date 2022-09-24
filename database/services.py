@@ -37,7 +37,7 @@ class PostService:
         """
         post = session.query(self.post).filter(self.post.post_id == input_data['id']).first()
         if not post:
-            raise 'Такого поста нет в бд'
+            raise ValueError('Такого поста нет в бд')
         post.quantity_comments = input_data['quantity_comments']
         post.likes = input_data['likes']
         post.views = input_data['views']
@@ -47,7 +47,7 @@ class PostService:
             print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
             session.rollback()
 
-    def select(self, input_data: dict):
+    def get_statistic(self, input_data: dict):
         """
         Функция принимает словарь со значениями
         периода времени и группы
@@ -86,15 +86,14 @@ class PostService:
                 self.post.date >= input_data['date'],
             ).scalar()
 
-            output_data = {
+            statistic = {
                 'count_post': posts,
                 'posts_with_photo': post_with_photo,
                 'likes': likes,
                 'views': views,
                 'comments': comments
             }
-
-            return output_data
+            return statistic
         else:
             return False
 

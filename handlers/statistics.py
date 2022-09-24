@@ -34,7 +34,7 @@ async def load_period(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['date'] = datetime.now() - timedelta(days=int(message.text))
 
-    statistics = post_service.select(data)
+    statistics = post_service.get_statistic(data)
 
     if statistics:
         text = f'За {data["date"]} дней выложено {statistics["count_post"]} постов' \
