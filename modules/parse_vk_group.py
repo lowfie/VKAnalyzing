@@ -63,7 +63,7 @@ class VkParser:
                 await asyncio.sleep(2)
 
             for item in response.get('response').get('items'):
-                if item is not None:
+                if item:
                     if len(item['text'].split()) > 1:
                         # Добавление данных в бд
                         comment_data = {
@@ -75,8 +75,6 @@ class VkParser:
                             service_comment.add(comment_data)
                         else:
                             service_comment.update(comment_data)
-                else:
-                    continue
 
     async def run_vk_parser(self, group):
         tasks = [
