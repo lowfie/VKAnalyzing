@@ -43,7 +43,7 @@ async def load_period(message: types.Message, state: FSMContext):
                f'Лайки: {statistics["likes"]}\n' \
                f'Комментарии: {statistics["comments"]}\n' \
                f'Репосты: {statistics["reposts"]}\n' \
-               f'Всего просмотров: {statistics["likes"]}\n\n' \
+               f'Всего просмотров: {statistics["views"]}\n\n' \
                f'Самый популярный пост: {hlink("ссылка", statistics["popular_post"])}\n' \
                f'Самый негативный пост: {hlink("ссылка", statistics["negative_post"])}'
     else:

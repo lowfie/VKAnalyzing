@@ -69,35 +69,22 @@ class PostService:
                 self.post.photo == 'true'
             ).count()
 
-            # Количество лайков со всех постов за период
-            likes = session.query(func.sum(self.post.likes)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-            ).scalar()
+            def get_sum_record(data, query_param):
+                parameter = session.query(func.sum(query_param)).filter(
+                    self.post.group == data['name'],
+                    self.post.date >= data['date'],
+                ).scalar()
+                return parameter
 
-            # Количество просмотров со всех постов за период
-            views = session.query(func.sum(self.post.views)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-            ).scalar()
-
-            # Количество комментариев с постов
-            comments = session.query(func.sum(self.post.quantity_comments)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-            ).scalar()
-
-            # Количество репостов с постов
-            reposts = session.query(func.sum(self.post.reposts)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-            ).scalar()
+            def get_max_record(data, query_param):
+                parameter = session.query(func.max(query_param)).filter(
+                    self.post.group == data['name'],
+                    self.post.date >= data['date'],
+                ).scalar()
+                return parameter
 
             def negative_post():
-                max_negative_comments_post = session.query(func.max(self.post.negative_comments)).filter(
-                    self.post.group == input_data['name'],
-                    self.post.date >= input_data['date'],
-                ).scalar()
+                max_negative_comments_post = get_max_record(input_data, self.post.negative_comments)
                 owner_id = session.query(self.post.owner_id).filter(
                     self.post.group == input_data['name'],
                     self.post.date >= input_data['date'],
@@ -111,10 +98,7 @@ class PostService:
                 return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
 
             def popular_post():
-                most_popular_post = session.query(func.max(self.post.views)).filter(
-                    self.post.group == input_data['name'],
-                    self.post.date >= input_data['date'],
-                ).scalar()
+                most_popular_post = get_max_record(input_data, self.post.views)
                 owner_id = session.query(self.post.owner_id).filter(
                     self.post.group == input_data['name'],
                     self.post.date >= input_data['date'],
@@ -130,10 +114,10 @@ class PostService:
             statistic = {
                 'count_post': posts,
                 'posts_with_photo': post_with_photo,
-                'likes': likes,
-                'views': views,
-                'comments': comments,
-                'reposts': reposts,
+                'likes': get_sum_record(input_data, self.post.likes),
+                'views': get_sum_record(input_data, self.post.views),
+                'comments': get_sum_record(input_data, self.post.quantity_comments),
+                'reposts': get_sum_record(input_data, self.post.reposts),
                 'negative_post': negative_post(),
                 'popular_post': popular_post()
             }
