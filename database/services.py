@@ -87,12 +87,37 @@ class PostService:
                 self.post.date >= input_data['date'],
             ).scalar()
 
+            # Количество репостов с постов
+            reposts = session.query(func.sum(self.post.reposts)).filter(
+                self.post.group == input_data['name'],
+                self.post.date >= input_data['date'],
+            ).scalar()
+
+            def negative_post():
+                max_negative_comments_post = session.query(func.max(self.post.negative_comments)).filter(
+                    self.post.group == input_data['name'],
+                    self.post.date >= input_data['date'],
+                ).scalar()
+                owner_id = session.query(self.post.owner_id).filter(
+                    self.post.group == input_data['name'],
+                    self.post.date >= input_data['date'],
+                    self.post.negative_comments == max_negative_comments_post
+                ).scalar()
+                post_id = session.query(self.post.post_id).filter(
+                    self.post.group == input_data['name'],
+                    self.post.date >= input_data['date'],
+                    self.post.negative_comments == max_negative_comments_post
+                ).scalar()
+                return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+
             statistic = {
                 'count_post': posts,
                 'posts_with_photo': post_with_photo,
                 'likes': likes,
                 'views': views,
-                'comments': comments
+                'comments': comments,
+                'reposts': reposts,
+                'negative_post': negative_post()
             }
             return statistic
         else:

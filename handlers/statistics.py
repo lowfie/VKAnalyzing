@@ -40,8 +40,11 @@ async def load_period(message: types.Message, state: FSMContext):
         text = f'За {(datetime.now() - data["date"]).days} дней было собрано {statistics["count_post"]} постов\n' \
                 f'Посты с фото/видео: {statistics["posts_with_photo"]}\n' \
                 f'Лайки: {statistics["likes"]}\n' \
-                f'Всего просмотров: {statistics["likes"]}\n' \
-                f'Комментарии: {statistics["comments"]}'
+                f'Комментарии: {statistics["comments"]}\n' \
+                f'Репосты: {statistics["reposts"]}\n' \
+                f'Всего просмотров: {statistics["likes"]}\n\n' \
+                f'Самый популярный пост: недоступно\n' \
+                f'Самый негативный пост: {statistics["negative_post"]}'
     else:
         text = f'К сожалению группы {data["name"]} нету в базе\n' \
                f'Вы можете её добавить написать /group <name>'
