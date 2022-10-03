@@ -25,6 +25,7 @@ class Comment(Base):
     comment_id = Column('comment_id', Integer, primary_key=True)
     post_id = Column(Integer, ForeignKey('posts.post_id'), nullable=False)
     text = Column('text', Text)
+    tone = Column('tone', Text)
 
 
 def create_tables():

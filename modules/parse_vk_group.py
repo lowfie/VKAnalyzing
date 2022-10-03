@@ -8,12 +8,15 @@ from database.models import Post, Comment
 from database import PostService, CommentService
 from loader import session
 
+from modules.sentiment_neural_network import SentimentalAnalysisModel
+
 
 class VkParser:
     def __init__(self):
         self.url = 'https://api.vk.com/method/'
         self.vk_version = 'v=5.131'
         self.posts_metadata = []
+        self.sentiment_model = SentimentalAnalysisModel()
 
     async def get_posts(self, group):
         """
@@ -63,18 +66,18 @@ class VkParser:
                 await asyncio.sleep(2)
 
             for item in response.get('response').get('items'):
-                if item:
-                    if len(item['text'].split()) > 1:
-                        # Добавление данных в бд
-                        comment_data = {
-                            'comment_id': item['id'],
-                            'post_id': post['post_id'],
-                            'text': item['text']
-                        }
-                        if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
-                            service_comment.add(comment_data)
-                        else:
-                            service_comment.update(comment_data)
+                if len(item['text'].split()) > 1:
+                    # Добавление данных в бд
+                    comment_data = {
+                        'comment_id': item['id'],
+                        'post_id': post['post_id'],
+                        'text': item['text'],
+                        'tone': self.sentiment_model.set_tone_of_the_comment([item['text']])
+                    }
+                    if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
+                        service_comment.add(comment_data)
+                    else:
+                        service_comment.update(comment_data)
 
     async def run_vk_parser(self, group):
         tasks = [

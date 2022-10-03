@@ -111,7 +111,8 @@ class CommentService:
         new_comment = self.comment(
             comment_id=input_data['comment_id'],
             post_id=input_data['post_id'],
-            text=input_data['text']
+            text=input_data['text'],
+            tone=input_data['tone']
         )
         session.add(new_comment)
         try:
