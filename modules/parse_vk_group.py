@@ -57,6 +57,7 @@ class VkParser:
         И занесение данных в бд
         """
         service_comment = CommentService(Comment)
+        service_post = PostService(Post)
         for num, post in enumerate(self.posts_metadata, start=1):
             link = self.url + f'wall.getComments?owner_id={post["owner_id"]}&post_id={post["post_id"]}' \
                               f'&count=100&sort=desc&access_token={VK_TOKEN}&{self.vk_version}'
@@ -68,14 +69,16 @@ class VkParser:
             for item in response.get('response').get('items'):
                 if len(item['text'].split()) > 1:
                     # Добавление данных в бд
+                    tone = self.sentiment_model.set_tone_of_the_comment([item['text']])
                     comment_data = {
                         'comment_id': item['id'],
                         'post_id': post['post_id'],
                         'text': item['text'],
-                        'tone': self.sentiment_model.set_tone_of_the_comment([item['text']])
+                        'tone': tone
                     }
                     if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
                         service_comment.add(comment_data)
+                        service_post.update_tonal_comments(tone, post['post_id'])
                     else:
                         service_comment.update(comment_data)
 

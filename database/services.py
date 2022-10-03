@@ -97,6 +97,26 @@ class PostService:
         else:
             return False
 
+    def update_tonal_comments(self, tone, where_post):
+        if tone == 'positive':
+            session.query(self.post). \
+                filter(self.post.post_id == where_post). \
+                update({"positive_comments": (self.post.positive_comments + 1)})
+            try:
+                session.commit()
+            except Exception as err:
+                print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+                session.rollback()
+        elif tone == 'negative':
+            session.query(self.post). \
+                filter(self.post.post_id == where_post). \
+                update({"negative_comments": (self.post.positive_comments + 1)})
+            try:
+                session.commit()
+            except Exception as err:
+                print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+                session.rollback()
+
 
 class CommentService:
 

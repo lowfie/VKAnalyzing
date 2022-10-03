@@ -11,8 +11,6 @@ class SentimentalAnalysisModel:
     def set_tone_of_the_comment(self, comment):
         results = self.model.predict(comment, k=2)[0]
 
-        print(comment)
-        print(results)
         for key, value in results.items():
             if key == 'speech':
                 return 'neutral'

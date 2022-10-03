@@ -37,7 +37,7 @@ async def load_period(message: types.Message, state: FSMContext):
     statistics = post_service.get_statistic(data)
 
     if statistics:
-        text = f'За {(datetime.now() - data["date"]).days} дней выложено {statistics["count_post"]} постов\n' \
+        text = f'За {(datetime.now() - data["date"]).days} дней было собрано {statistics["count_post"]} постов\n' \
                 f'Посты с фото/видео: {statistics["posts_with_photo"]}\n' \
                 f'Лайки: {statistics["likes"]}\n' \
                 f'Всего просмотров: {statistics["likes"]}\n' \

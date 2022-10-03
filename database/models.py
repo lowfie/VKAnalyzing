@@ -15,6 +15,8 @@ class Post(Base):
     views = Column('views', BigInteger)
     photo = Column('photo', Boolean)
     post_text = Column('text', Text)
+    positive_comments = Column('positive_comments', Integer, default=0)
+    negative_comments = Column('negative_comments', Integer, default=0)
     date = Column('date', DateTime)
     comment = relationship('Comment', lazy='select')
 
