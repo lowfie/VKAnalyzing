@@ -17,6 +17,7 @@ class PostService:
             owner_id=input_data['owner_id'],
             group=input_data['group'],
             quantity_comments=input_data['quantity_comments'],
+            reposts=input_data['reposts'],
             likes=input_data['likes'],
             views=input_data['views'],
             photo=input_data['photo'],
