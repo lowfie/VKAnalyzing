@@ -1,6 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.markdown import hlink
 from loader import dp
 
 from datetime import datetime, timedelta
@@ -38,20 +39,22 @@ async def load_period(message: types.Message, state: FSMContext):
 
     if statistics:
         text = f'За {(datetime.now() - data["date"]).days} дней было собрано {statistics["count_post"]} постов\n' \
-                f'Посты с фото/видео: {statistics["posts_with_photo"]}\n' \
-                f'Лайки: {statistics["likes"]}\n' \
-                f'Комментарии: {statistics["comments"]}\n' \
-                f'Репосты: {statistics["reposts"]}\n' \
-                f'Всего просмотров: {statistics["likes"]}\n\n' \
-                f'Самый популярный пост: недоступно\n' \
-                f'Самый негативный пост: {statistics["negative_post"]}'
+               f'Посты с фото/видео: {statistics["posts_with_photo"]}\n' \
+               f'Лайки: {statistics["likes"]}\n' \
+               f'Комментарии: {statistics["comments"]}\n' \
+               f'Репосты: {statistics["reposts"]}\n' \
+               f'Всего просмотров: {statistics["likes"]}\n\n' \
+               f'Самый популярный пост: {hlink("ссылка", statistics["popular_post"])}\n' \
+               f'Самый негативный пост: {hlink("ссылка", statistics["negative_post"])}'
     else:
         text = f'К сожалению группы {data["name"]} нету в базе\n' \
                f'Вы можете её добавить написать /group <name>'
 
     await dp.bot.send_message(
         chat_id=message.chat.id,
-        text=text
+        text=text,
+        disable_web_page_preview=True,
+        parse_mode='html'
     )
 
     await state.finish()

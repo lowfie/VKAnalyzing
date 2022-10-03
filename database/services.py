@@ -110,6 +110,23 @@ class PostService:
                 ).scalar()
                 return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
 
+            def popular_post():
+                most_popular_post = session.query(func.max(self.post.views)).filter(
+                    self.post.group == input_data['name'],
+                    self.post.date >= input_data['date'],
+                ).scalar()
+                owner_id = session.query(self.post.owner_id).filter(
+                    self.post.group == input_data['name'],
+                    self.post.date >= input_data['date'],
+                    self.post.views == most_popular_post
+                ).scalar()
+                post_id = session.query(self.post.post_id).filter(
+                    self.post.group == input_data['name'],
+                    self.post.date >= input_data['date'],
+                    self.post.views == most_popular_post
+                ).scalar()
+                return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+
             statistic = {
                 'count_post': posts,
                 'posts_with_photo': post_with_photo,
@@ -117,7 +134,8 @@ class PostService:
                 'views': views,
                 'comments': comments,
                 'reposts': reposts,
-                'negative_post': negative_post()
+                'negative_post': negative_post(),
+                'popular_post': popular_post()
             }
             return statistic
         else:
