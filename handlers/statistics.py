@@ -38,18 +38,24 @@ async def load_period(message: types.Message, state: FSMContext):
     statistics = post_service.get_statistic(data)
 
     if statistics:
-        text = f'За {(datetime.now() - data["date"]).days} дней было собрано {statistics["count_post"]} постов\n' \
-               f'Посты с фото/видео: {statistics["posts_with_photo"]}\n' \
-               f'Лайки: {statistics["likes"]}\n' \
-               f'Комментарии: {statistics["comments"]}\n' \
-               f'Репосты: {statistics["reposts"]}\n' \
-               f'Всего просмотров: {statistics["views"]}\n\n' \
-               f'{hlink("Самый популярный пост", statistics["popular_post"])}\n' \
-               f'{hlink("Самый негативный пост", statistics["negative_post"])}'
+        text = f"""
+За {(datetime.now() - data["date"]).days} дней было собрано {statistics["count_post"]} постов
+Посты с фото/видео: {statistics["posts_with_photo"]}
+Лайки: {statistics["likes"]}
+Комментарии: {statistics["comments"]}
+Репосты: {statistics["reposts"]}
+Всего просмотров: {statistics["views"]}\n\n
+По мнению пользователей
+{hlink("Самый популярный пост", statistics["popular_post"])}
+{hlink("Самый позитивный пост", statistics["positive_post"])}
+{hlink("Самый негативный пост", statistics["negative_post"])}
+"""
         parse_mode = 'html'
     else:
-        text = f'К сожалению группы {data["name"]} нету в базе\n' \
-               f'Вы можете её добавить написать /group <name>'
+        text = f"""
+К сожалению группы {data["name"]} нету в базе
+Вы можете её добавить написать /group <name>
+"""
         parse_mode = None
 
     await dp.bot.send_message(
