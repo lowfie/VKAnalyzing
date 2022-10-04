@@ -15,7 +15,7 @@ class FSMDate(StatesGroup):
     days = State()
 
 
-@dp.message_handler(commands='stats',state=None)
+@dp.message_handler(commands='stats', state=None)
 async def cm_stats(message: types.Message):
     await FSMDate.name.set()
     await message.reply('Введите название группы из ссылки')
@@ -24,7 +24,7 @@ async def cm_stats(message: types.Message):
 @dp.message_handler(state=FSMDate.name, content_types=['text'])
 async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['name'] = str(message.text)
+        data['name'] = message.text
     await message.reply('Введите период подсчёта статистики в днях')
     await FSMDate.next()
 
@@ -44,8 +44,8 @@ async def load_period(message: types.Message, state: FSMContext):
                f'Комментарии: {statistics["comments"]}\n' \
                f'Репосты: {statistics["reposts"]}\n' \
                f'Всего просмотров: {statistics["views"]}\n\n' \
-               f'Самый популярный пост: {hlink("ссылка", statistics["popular_post"])}\n' \
-               f'Самый негативный пост: {hlink("ссылка", statistics["negative_post"])}'
+               f'{hlink("Самый популярный пост", statistics["popular_post"])}\n' \
+               f'{hlink("Самый негативный пост", statistics["negative_post"])}'
         parse_mode = 'html'
     else:
         text = f'К сожалению группы {data["name"]} нету в базе\n' \

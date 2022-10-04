@@ -1,10 +1,12 @@
 from loader import session
 from sqlalchemy import func
 
+from loader import Base
+
 
 class PostService:
 
-    def __init__(self, post):
+    def __init__(self, post: Base):
         self.post = post
 
     def add(self, input_data: dict):
@@ -135,7 +137,7 @@ class PostService:
 
 class CommentService:
 
-    def __init__(self, comment):
+    def __init__(self, comment: Base):
         self.comment = comment
 
     def add(self, input_data: dict):
@@ -163,7 +165,7 @@ class CommentService:
         """
         comment = session.query(self.comment).filter(self.comment.comment_id == input_data['comment_id']).first()
         if not comment:
-            raise 'Такого комментария нет в бд'
+            raise ValueError('Такого комментария нет в бд')
         comment.text = input_data['text']
         try:
             session.commit()

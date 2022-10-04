@@ -13,8 +13,8 @@ from modules.sentiment_neural_network import SentimentalAnalysisModel
 
 class VkParser:
     def __init__(self):
-        self.url = 'https://api.vk.com/method/'
-        self.vk_version = 'v=5.131'
+        self.wall_get = 'https://api.vk.com/method/wall.get'
+        self.wall_getComments = 'https://api.vk.com/method/wall.getComments'
         self.posts_metadata = []
         self.sentiment_model = SentimentalAnalysisModel()
 
@@ -23,8 +23,13 @@ class VkParser:
         Парсинг данных 40 последних постов из группы вк
         И занесение данных в бд
         """
-        link = self.url + f'wall.get?domain={group}&count=40&access_token={VK_TOKEN}&{self.vk_version}'
-        response = httpx.get(link).json()
+        params = {
+            'domain': group,
+            'count': 40,
+            'access_token': VK_TOKEN,
+            'v': 5.131
+        }
+        response = httpx.get(self.wall_get, params=params).json()
 
         service_post = PostService(Post)
 
@@ -60,9 +65,15 @@ class VkParser:
         service_comment = CommentService(Comment)
         service_post = PostService(Post)
         for num, post in enumerate(self.posts_metadata, start=1):
-            link = self.url + f'wall.getComments?owner_id={post["owner_id"]}&post_id={post["post_id"]}' \
-                              f'&count=100&sort=desc&access_token={VK_TOKEN}&{self.vk_version}'
-            response = httpx.get(link).json()
+            params = {
+                'owner_id': post["owner_id"],
+                'post_id': post["post_id"],
+                'count': 100,
+                'sort': 'desc',
+                'access_token': VK_TOKEN,
+                'v': 5.131
+            }
+            response = httpx.get(self.wall_getComments, params=params).json()
             # Обход ограничение на 5 запросов в секунду
             if num % 4 == 0:
                 await asyncio.sleep(2)

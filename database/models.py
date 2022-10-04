@@ -14,7 +14,7 @@ class Post(Base):
     quantity_comments = Column('quantity_comments', Integer, default=0)
     reposts = Column('reposts', Integer, default=0)
     views = Column('views', BigInteger, default=0)
-    photo = Column('photo', Boolean)
+    photo = Column('is_photo', Boolean)
     post_text = Column('text', Text)
     positive_comments = Column('positive_comments', Integer, default=0)
     negative_comments = Column('negative_comments', Integer, default=0)
