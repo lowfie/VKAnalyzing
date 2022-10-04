@@ -52,64 +52,51 @@ class PostService:
         """
         Функция принимает словарь со значениями
         периода времени и группы
-        Далее функция возвращает словарь со статистика
+        Далее функция возвращает словарь со статистикой
         """
 
         if session.query(self.post).filter(self.post.group == input_data['name']).first():
             # Количество постов за период
-            posts = session.query(self.post).filter(
+            posts = session.query(func.count(self.post.post_id)).filter(
                 self.post.group == input_data['name'],
                 self.post.date >= input_data['date']
-            ).count()
+            ).first()[0]
 
             # Количество постов с фото/видео за период
-            post_with_photo = session.query(self.post).filter(
+            post_with_photo = session.query(func.count(self.post.post_id)).filter(
                 self.post.group == input_data['name'],
                 self.post.date >= input_data['date'],
                 self.post.photo == 'true'
-            ).count()
+            ).first()[0]
 
             def get_sum_record(data, query_param):
                 parameter = session.query(func.sum(query_param)).filter(
                     self.post.group == data['name'],
                     self.post.date >= data['date'],
-                ).scalar()
+                ).first()[0]
                 return parameter
 
-            def get_max_record(data, query_param):
-                parameter = session.query(func.max(query_param)).filter(
+            def get_most_value_record(data, query_param):
+                max_value_record = session.query(func.max(query_param)).filter(
+                    self.post.group == data['name'],
+                    self.post.date >= data['date']
+                ).first()[0]
+                owner_id = session.query(self.post.owner_id).filter(
                     self.post.group == data['name'],
                     self.post.date >= data['date'],
-                ).scalar()
-                return parameter
-
-            def negative_post():
-                max_negative_comments_post = get_max_record(input_data, self.post.negative_comments)
-                owner_id = session.query(self.post.owner_id).filter(
-                    self.post.group == input_data['name'],
-                    self.post.date >= input_data['date'],
-                    self.post.negative_comments == max_negative_comments_post
-                ).scalar()
+                    query_param == max_value_record
+                ).first()[0]
                 post_id = session.query(self.post.post_id).filter(
-                    self.post.group == input_data['name'],
-                    self.post.date >= input_data['date'],
-                    self.post.negative_comments == max_negative_comments_post
-                ).scalar()
-                return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+                    self.post.owner_id == owner_id,
+                    query_param == max_value_record
+                ).first()[0]
+                return {'owner_id': owner_id, 'post_id': post_id}
 
-            def popular_post():
-                most_popular_post = get_max_record(input_data, self.post.views)
-                owner_id = session.query(self.post.owner_id).filter(
-                    self.post.group == input_data['name'],
-                    self.post.date >= input_data['date'],
-                    self.post.views == most_popular_post
-                ).scalar()
-                post_id = session.query(self.post.post_id).filter(
-                    self.post.group == input_data['name'],
-                    self.post.date >= input_data['date'],
-                    self.post.views == most_popular_post
-                ).scalar()
-                return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+            def get_url_most_value_record(data, query_param):
+                params = get_most_value_record(data, query_param)
+                owner_id = params['owner_id']
+                post_id = params['post_id']
+                return f'https://vk.com/{data["name"]}?w=wall{owner_id}_{post_id}'
 
             statistic = {
                 'count_post': posts,
@@ -118,8 +105,8 @@ class PostService:
                 'views': get_sum_record(input_data, self.post.views),
                 'comments': get_sum_record(input_data, self.post.quantity_comments),
                 'reposts': get_sum_record(input_data, self.post.reposts),
-                'negative_post': negative_post(),
-                'popular_post': popular_post()
+                'negative_post': get_url_most_value_record(input_data, self.post.negative_comments),
+                'popular_post': get_url_most_value_record(input_data, self.post.views)
             }
             return statistic
         else:

@@ -46,15 +46,17 @@ async def load_period(message: types.Message, state: FSMContext):
                f'Всего просмотров: {statistics["views"]}\n\n' \
                f'Самый популярный пост: {hlink("ссылка", statistics["popular_post"])}\n' \
                f'Самый негативный пост: {hlink("ссылка", statistics["negative_post"])}'
+        parse_mode = 'html'
     else:
         text = f'К сожалению группы {data["name"]} нету в базе\n' \
                f'Вы можете её добавить написать /group <name>'
+        parse_mode = None
 
     await dp.bot.send_message(
         chat_id=message.chat.id,
         text=text,
         disable_web_page_preview=True,
-        parse_mode='html'
+        parse_mode=parse_mode
     )
 
     await state.finish()
