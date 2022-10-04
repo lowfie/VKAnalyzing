@@ -1,12 +1,10 @@
 from loader import session
 from sqlalchemy import func
 
-from loader import Base
-
 
 class PostService:
 
-    def __init__(self, post: Base):
+    def __init__(self, post):
         self.post = post
 
     def add(self, input_data: dict):
@@ -108,6 +106,7 @@ class PostService:
                 'comments': get_sum_record(input_data, self.post.quantity_comments),
                 'reposts': get_sum_record(input_data, self.post.reposts),
                 'negative_post': get_url_most_value_record(input_data, self.post.negative_comments),
+                'positive_post': get_url_most_value_record(input_data, self.post.positive_comments),
                 'popular_post': get_url_most_value_record(input_data, self.post.views)
             }
             return statistic
@@ -116,28 +115,24 @@ class PostService:
 
     def update_tonal_comments(self, tone, where_post):
         if tone == 'positive':
-            session.query(self.post). \
-                filter(self.post.post_id == where_post). \
-                update({"positive_comments": (self.post.positive_comments + 1)})
-            try:
-                session.commit()
-            except Exception as err:
-                print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
-                session.rollback()
+            column = {'positive_comments': (self.post.positive_comments + 1)}
         elif tone == 'negative':
-            session.query(self.post). \
-                filter(self.post.post_id == where_post). \
-                update({"negative_comments": (self.post.positive_comments + 1)})
-            try:
-                session.commit()
-            except Exception as err:
-                print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
-                session.rollback()
+            column = {'negative_comments': (self.post.negative_comments + 1)}
+        else:
+            column = {'negative_comments': self.post.negative_comments}
+
+        session.query(self.post).filter(self.post.post_id == where_post).update(column)
+
+        try:
+            session.commit()
+        except Exception as err:
+            print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+            session.rollback()
 
 
 class CommentService:
 
-    def __init__(self, comment: Base):
+    def __init__(self, comment):
         self.comment = comment
 
     def add(self, input_data: dict):
