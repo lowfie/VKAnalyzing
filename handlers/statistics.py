@@ -25,7 +25,7 @@ async def cm_stats(message: types.Message):
 async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['name'] = message.text
-    await message.reply('Введите период подсчёта статистики в днях')
+    await message.reply('Введите период подсчёта статистики (в днях)')
     await FSMDate.next()
 
 
@@ -45,7 +45,6 @@ async def load_period(message: types.Message, state: FSMContext):
 Комментарии: {statistics["comments"]}
 Репосты: {statistics["reposts"]}
 Всего просмотров: {statistics["views"]}\n\n
-По мнению пользователей
 {hlink("Самый популярный пост", statistics["popular_post"])}
 {hlink("Самый позитивный пост", statistics["positive_post"])}
 {hlink("Самый негативный пост", statistics["negative_post"])}

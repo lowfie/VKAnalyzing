@@ -13,8 +13,10 @@ from modules.sentiment_neural_network import SentimentalAnalysisModel
 
 class VkParser:
     def __init__(self):
-        self.wall_get = 'https://api.vk.com/method/wall.get'
-        self.wall_getComments = 'https://api.vk.com/method/wall.getComments'
+        self.url = 'https://api.vk.com/method/'
+        self.wall_get = self.url + 'wall.get'
+        self.wall_getComments = self.url + 'wall.getComments'
+        self.groups_getMembers = self.url + 'groups.getMembers'
         self.posts_metadata = []
         self.sentiment_model = SentimentalAnalysisModel()
 
