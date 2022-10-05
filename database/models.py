@@ -4,6 +4,15 @@ from sqlalchemy.orm import relationship
 from loader import Base, engine
 
 
+class Group(Base):
+    __tablename__ = 'groups'
+
+    group_id = Column('group_id', Integer, primary_key=True)
+    group_name = Column('group_name', Text)
+    screen_name = Column('screen_name', Text)
+    group_members = Column('members', Integer, default=0)
+
+
 class Post(Base):
     __tablename__ = 'posts'
 

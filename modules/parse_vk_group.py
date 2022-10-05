@@ -4,8 +4,8 @@ import asyncio
 
 from datetime import datetime
 
-from database.models import Post, Comment
-from database import PostService, CommentService
+from database.models import Post, Comment, Group
+from database import PostService, CommentService, GroupService
 from loader import session
 
 from modules.sentiment_neural_network import SentimentalAnalysisModel
@@ -16,9 +16,33 @@ class VkParser:
         self.url = 'https://api.vk.com/method/'
         self.wall_get = self.url + 'wall.get'
         self.wall_getComments = self.url + 'wall.getComments'
+        self.groups_getGroup = self.url + 'groups.getById'
         self.groups_getMembers = self.url + 'groups.getMembers'
+        self.vk_version = 5.131
         self.posts_metadata = []
         self.sentiment_model = SentimentalAnalysisModel()
+
+    async def get_group_byid(self, group):
+        params = {
+            'group_id': group,
+            'access_token': VK_TOKEN,
+            'count': 0,
+            'v': self.vk_version
+        }
+        get_group = httpx.get(self.groups_getGroup, params=params).json()['response'][0]
+        get_group_members = httpx.get(self.groups_getMembers, params=params).json()['response']
+
+        group_data = {
+            'id': get_group['id'],
+            'name': get_group['name'],
+            'screen_name': get_group['screen_name'],
+            'members': get_group_members['count']
+        }
+        service_group = GroupService(Group)
+        if session.query(Group).filter(Group.group_id == group_data['id']).first() is None:
+            service_group.add(group_data)
+        else:
+            service_group.update(group_data)
 
     async def get_posts(self, group):
         """
@@ -29,7 +53,7 @@ class VkParser:
             'domain': group,
             'count': 40,
             'access_token': VK_TOKEN,
-            'v': 5.131
+            'v': self.vk_version
         }
         response = httpx.get(self.wall_get, params=params).json()
 
@@ -73,7 +97,7 @@ class VkParser:
                 'count': 100,
                 'sort': 'desc',
                 'access_token': VK_TOKEN,
-                'v': 5.131
+                'v': self.vk_version
             }
             response = httpx.get(self.wall_getComments, params=params).json()
             # Обход ограничение на 5 запросов в секунду
@@ -98,6 +122,7 @@ class VkParser:
 
     async def run_vk_parser(self, group):
         tasks = [
+            self.get_group_byid(group),
             self.get_posts(group),
             self.get_wall_comments()
         ]

@@ -2,6 +2,43 @@ from loader import session
 from sqlalchemy import func
 
 
+class GroupService:
+
+    def __init__(self, group):
+        self.group = group
+
+    def add(self, input_data: dict):
+        new_group = self.group(
+            group_id=input_data['id'],
+            group_name=input_data['name'],
+            screen_name=input_data['screen_name'],
+            group_members=input_data['members']
+        )
+        session.add(new_group)
+        try:
+            session.commit()
+        except Exception as err:
+            print('Произошла ошибка при сохранении Поста, Текст ошибки:', err)
+            session.rollback()
+
+    def update(self, input_data: dict):
+        """
+        Функция принимает словарь с данными
+        и обновляет их
+        """
+        group = session.query(self.group).filter(self.group.group_id == input_data['id']).first()
+        if not group:
+            raise ValueError('Такого поста нет в бд')
+        group.group_name = input_data['name']
+        group.screen_name = input_data['screen_name']
+        group.group_members = input_data['members']
+        try:
+            session.commit()
+        except Exception as err:
+            print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+            session.rollback()
+
+
 class PostService:
 
     def __init__(self, post):
