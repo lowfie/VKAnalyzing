@@ -17,6 +17,7 @@ class PostService:
             owner_id=input_data['owner_id'],
             group=input_data['group'],
             quantity_comments=input_data['quantity_comments'],
+            reposts=input_data['reposts'],
             likes=input_data['likes'],
             views=input_data['views'],
             photo=input_data['photo'],
@@ -51,51 +52,82 @@ class PostService:
         """
         Функция принимает словарь со значениями
         периода времени и группы
-        Далее функция возвращает словарь со статистика
+        Далее функция возвращает словарь со статистикой
         """
 
         if session.query(self.post).filter(self.post.group == input_data['name']).first():
             # Количество постов за период
-            posts = session.query(self.post).filter(
+            posts = session.query(func.count(self.post.post_id)).filter(
                 self.post.group == input_data['name'],
                 self.post.date >= input_data['date']
-            ).count()
+            ).first()[0]
 
             # Количество постов с фото/видео за период
-            post_with_photo = session.query(self.post).filter(
+            post_with_photo = session.query(func.count(self.post.post_id)).filter(
                 self.post.group == input_data['name'],
                 self.post.date >= input_data['date'],
                 self.post.photo == 'true'
-            ).count()
+            ).first()[0]
 
-            # Количество лайков со всех постов за период
-            likes = session.query(func.sum(self.post.likes)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-            ).scalar()
+            def get_sum_record(data, query_param):
+                parameter = session.query(func.sum(query_param)).filter(
+                    self.post.group == data['name'],
+                    self.post.date >= data['date'],
+                ).first()[0]
+                return parameter
 
-            # Количество просмотров со всех постов за период
-            views = session.query(func.sum(self.post.views)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-            ).scalar()
+            def get_most_value_record(data, query_param):
+                max_value_record = session.query(func.max(query_param)).filter(
+                    self.post.group == data['name'],
+                    self.post.date >= data['date']
+                ).first()[0]
+                owner_id = session.query(self.post.owner_id).filter(
+                    self.post.group == data['name'],
+                    self.post.date >= data['date'],
+                    query_param == max_value_record
+                ).first()[0]
+                post_id = session.query(self.post.post_id).filter(
+                    self.post.owner_id == owner_id,
+                    query_param == max_value_record
+                ).first()[0]
+                return {'owner_id': owner_id, 'post_id': post_id}
 
-            # Количество комментариев с постов
-            comments = session.query(func.sum(self.post.quantity_comments)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-            ).scalar()
+            def get_url_most_value_record(data, query_param):
+                params = get_most_value_record(data, query_param)
+                owner_id = params['owner_id']
+                post_id = params['post_id']
+                return f'https://vk.com/{data["name"]}?w=wall{owner_id}_{post_id}'
 
             statistic = {
                 'count_post': posts,
                 'posts_with_photo': post_with_photo,
-                'likes': likes,
-                'views': views,
-                'comments': comments
+                'likes': get_sum_record(input_data, self.post.likes),
+                'views': get_sum_record(input_data, self.post.views),
+                'comments': get_sum_record(input_data, self.post.quantity_comments),
+                'reposts': get_sum_record(input_data, self.post.reposts),
+                'negative_post': get_url_most_value_record(input_data, self.post.negative_comments),
+                'positive_post': get_url_most_value_record(input_data, self.post.positive_comments),
+                'popular_post': get_url_most_value_record(input_data, self.post.views)
             }
             return statistic
         else:
             return False
+
+    def update_tonal_comments(self, tone, where_post):
+        if tone == 'positive':
+            column = {'positive_comments': (self.post.positive_comments + 1)}
+        elif tone == 'negative':
+            column = {'negative_comments': (self.post.negative_comments + 1)}
+        else:
+            column = {'negative_comments': self.post.negative_comments}
+
+        session.query(self.post).filter(self.post.post_id == where_post).update(column)
+
+        try:
+            session.commit()
+        except Exception as err:
+            print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+            session.rollback()
 
 
 class CommentService:
@@ -111,7 +143,8 @@ class CommentService:
         new_comment = self.comment(
             comment_id=input_data['comment_id'],
             post_id=input_data['post_id'],
-            text=input_data['text']
+            text=input_data['text'],
+            tone=input_data['tone']
         )
         session.add(new_comment)
         try:
@@ -127,7 +160,7 @@ class CommentService:
         """
         comment = session.query(self.comment).filter(self.comment.comment_id == input_data['comment_id']).first()
         if not comment:
-            raise 'Такого комментария нет в бд'
+            raise ValueError('Такого комментария нет в бд')
         comment.text = input_data['text']
         try:
             session.commit()
