@@ -11,6 +11,7 @@ class Group(Base):
     group_name = Column('group_name', Text)
     screen_name = Column('screen_name', Text)
     group_members = Column('members', Integer, default=0)
+    post = relationship('Post', lazy='select')
 
 
 class Post(Base):
@@ -18,7 +19,7 @@ class Post(Base):
 
     post_id = Column('post_id', Integer, primary_key=True)
     owner_id = Column('owner_id', Integer)
-    group = Column('group', Text)
+    group_id = Column(Integer, ForeignKey(Group.group_id), nullable=False)
     likes = Column('likes', Integer, default=0)
     quantity_comments = Column('quantity_comments', Integer, default=0)
     reposts = Column('reposts', Integer, default=0)

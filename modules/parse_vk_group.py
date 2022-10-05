@@ -20,6 +20,7 @@ class VkParser:
         self.groups_getMembers = self.url + 'groups.getMembers'
         self.vk_version = 5.131
         self.posts_metadata = []
+        self.group_metadata = []
         self.sentiment_model = SentimentalAnalysisModel()
 
     async def get_group_byid(self, group):
@@ -33,55 +34,56 @@ class VkParser:
         get_group_members = httpx.get(self.groups_getMembers, params=params).json()['response']
 
         group_data = {
-            'id': get_group['id'],
+            'group_id': get_group['id'],
             'name': get_group['name'],
             'screen_name': get_group['screen_name'],
             'members': get_group_members['count']
         }
+        self.group_metadata.append(group_data)
         service_group = GroupService(Group)
-        if session.query(Group).filter(Group.group_id == group_data['id']).first() is None:
+        if session.query(Group).filter(Group.group_id == group_data['group_id']).first() is None:
             service_group.add(group_data)
         else:
             service_group.update(group_data)
 
-    async def get_posts(self, group):
+    async def get_posts(self):
         """
         Парсинг данных 40 последних постов из группы вк
         И занесение данных в бд
         """
-        params = {
-            'domain': group,
-            'count': 40,
-            'access_token': VK_TOKEN,
-            'v': self.vk_version
-        }
-        response = httpx.get(self.wall_get, params=params).json()
-
-        service_post = PostService(Post)
-
-        # Список из 40 последних постов
-        items = [item for item in response['response']['items']]
-
-        for item in items:
-            self.posts_metadata.append({'post_id': item['id'], 'owner_id': item['owner_id']})
-            # Добавление данных в бд
-            # Попробовать добавить bulk_insert_mappings (Оптимизация)
-            post_data = {
-                'id': item['id'],
-                'owner_id': item['owner_id'],
-                'group': group,
-                'likes': item['likes']['count'],
-                'quantity_comments': item['comments']['count'],
-                'reposts': item['reposts']['count'],
-                'views': item['views']['count'],
-                'photo': True if 'attachments' in item else False,
-                'text': item['text'],
-                'date': datetime.fromtimestamp(item['date'])
+        for group in self.group_metadata:
+            params = {
+                'domain': group['screen_name'],
+                'count': 40,
+                'access_token': VK_TOKEN,
+                'v': self.vk_version
             }
-            if session.query(Post).filter(Post.post_id == post_data['id']).first() is None:
-                service_post.add(post_data)
-            else:
-                service_post.update(post_data)
+            response = httpx.get(self.wall_get, params=params).json()
+
+            service_post = PostService(Post)
+
+            # Список из 40 последних постов
+            items = [item for item in response['response']['items']]
+
+            for item in items:
+                self.posts_metadata.append({'post_id': item['id'], 'owner_id': item['owner_id']})
+                # Добавление данных в таблицу posts
+                post_data = {
+                    'post_id': item['id'],
+                    'owner_id': item['owner_id'],
+                    'group_id': group['group_id'],
+                    'likes': item['likes']['count'],
+                    'quantity_comments': item['comments']['count'],
+                    'reposts': item['reposts']['count'],
+                    'views': item['views']['count'],
+                    'photo': True if 'attachments' in item else False,
+                    'text': item['text'],
+                    'date': datetime.fromtimestamp(item['date'])
+                }
+                if session.query(Post).filter(Post.post_id == post_data['post_id']).first() is None:
+                    service_post.add(post_data)
+                else:
+                    service_post.update(post_data)
 
     async def get_wall_comments(self):
         """
@@ -123,7 +125,7 @@ class VkParser:
     async def run_vk_parser(self, group):
         tasks = [
             self.get_group_byid(group),
-            self.get_posts(group),
+            self.get_posts(),
             self.get_wall_comments()
         ]
 

@@ -9,7 +9,7 @@ class GroupService:
 
     def add(self, input_data: dict):
         new_group = self.group(
-            group_id=input_data['id'],
+            group_id=input_data['group_id'],
             group_name=input_data['name'],
             screen_name=input_data['screen_name'],
             group_members=input_data['members']
@@ -26,7 +26,7 @@ class GroupService:
         Функция принимает словарь с данными
         и обновляет их
         """
-        group = session.query(self.group).filter(self.group.group_id == input_data['id']).first()
+        group = session.query(self.group).filter(self.group.group_id == input_data['group_id']).first()
         if not group:
             raise ValueError('Такого поста нет в бд')
         group.group_name = input_data['name']
@@ -50,9 +50,9 @@ class PostService:
         и добавляет эти данные бд, если их не существует
         """
         new_post = self.post(
-            post_id=input_data['id'],
+            post_id=input_data['post_id'],
             owner_id=input_data['owner_id'],
-            group=input_data['group'],
+            group_id=input_data['group_id'],
             quantity_comments=input_data['quantity_comments'],
             reposts=input_data['reposts'],
             likes=input_data['likes'],
@@ -73,7 +73,7 @@ class PostService:
         Функция принимает словарь с данными
         и обновляет их
         """
-        post = session.query(self.post).filter(self.post.post_id == input_data['id']).first()
+        post = session.query(self.post).filter(self.post.post_id == input_data['post_id']).first()
         if not post:
             raise ValueError('Такого поста нет в бд')
         post.quantity_comments = input_data['quantity_comments']
