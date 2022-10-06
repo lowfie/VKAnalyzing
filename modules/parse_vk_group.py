@@ -24,6 +24,11 @@ class VkParser:
         self.sentiment_model = SentimentalAnalysisModel()
 
     async def get_group_byid(self, group):
+        """
+        Функция принимает на вход имя в ссылке группы и собирает данные
+        Далее она сохраняет в бд и передаёт параметры для сбора постов
+        И комментариев
+        """
         params = {
             'group_id': group,
             'access_token': VK_TOKEN,
@@ -39,8 +44,13 @@ class VkParser:
             'screen_name': get_group['screen_name'],
             'members': get_group_members['count']
         }
-        self.group_metadata.append(group_data)
+        # Инициализация класса для сохранения в бд
         service_group = GroupService(Group)
+
+        # Формирование списка с данным для сбора постов
+        self.group_metadata.append(group_data)
+
+        # Сохранение и обновление данных в бд
         if session.query(Group).filter(Group.group_id == group_data['group_id']).first() is None:
             service_group.add(group_data)
         else:
@@ -48,18 +58,19 @@ class VkParser:
 
     async def get_posts(self):
         """
-        Парсинг данных 40 последних постов из группы вк
+        Парсинг данных последних постов из группы вк
         И занесение данных в бд
         """
         for group in self.group_metadata:
             params = {
                 'domain': group['screen_name'],
-                'count': 40,
+                'count': 60,
                 'access_token': VK_TOKEN,
                 'v': self.vk_version
             }
             response = httpx.get(self.wall_get, params=params).json()
 
+            # Инициализация класса для сохранения в бд
             service_post = PostService(Post)
 
             # Список из 40 последних постов
@@ -90,12 +101,16 @@ class VkParser:
         Парсинг комментариев поста
         И занесение данных в бд
         """
+
+        # Инициализация класса для сохранения в бд
         service_comment = CommentService(Comment)
         service_post = PostService(Post)
+
+        # Перебор всех постов для получения комментариев
         for num, post in enumerate(self.posts_metadata, start=1):
             params = {
-                'owner_id': post["owner_id"],
-                'post_id': post["post_id"],
+                'owner_id': post['owner_id'],
+                'post_id': post['post_id'],
                 'count': 100,
                 'sort': 'desc',
                 'access_token': VK_TOKEN,
@@ -106,6 +121,7 @@ class VkParser:
             if num % 4 == 0:
                 await asyncio.sleep(2)
 
+            # Итерация всех комментариев поста
             for item in response.get('response').get('items'):
                 if len(item['text'].split()) > 1:
                     # Добавление данных в бд
