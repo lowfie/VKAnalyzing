@@ -72,17 +72,20 @@ class Analytics:
         """
         group_id = self.get_group_id(input_data['name'])
 
-        max_value_record = session.query(func.max(query_param)).filter(
-            self.post.group_id == group_id,
-            self.post.date >= input_data['date']
-        ).first()[0]
-        owner_id = session.query(self.post.owner_id).filter(
-            self.post.group_id == group_id,
-            self.post.date >= input_data['date'],
-            query_param == max_value_record
-        ).first()[0]
-        post_id = session.query(self.post.post_id).filter(
-            self.post.owner_id == owner_id,
-            query_param == max_value_record
-        ).first()[0]
-        return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+        if group_id:
+            max_value_record = session.query(func.max(query_param)).filter(
+                self.post.group_id == group_id,
+                self.post.date >= input_data['date']
+            ).first()[0]
+            owner_id = session.query(self.post.owner_id).filter(
+                self.post.group_id == group_id,
+                self.post.date >= input_data['date'],
+                query_param == max_value_record
+            ).first()[0]
+            post_id = session.query(self.post.post_id).filter(
+                self.post.owner_id == owner_id,
+                query_param == max_value_record
+            ).first()[0]
+            return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+        else:
+            return False
