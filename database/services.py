@@ -1,5 +1,6 @@
+import logging
+
 from loader import session
-from sqlalchemy import func
 
 
 class GroupService:
@@ -22,7 +23,7 @@ class GroupService:
         try:
             session.commit()
         except Exception as err:
-            print('Произошла ошибка при сохранении Поста, Текст ошибки:', err)
+            logging.error('Произошла ошибка при сохранении Поста, Текст ошибки:', err)
             session.rollback()
 
     def update(self, input_data: dict):
@@ -39,7 +40,7 @@ class GroupService:
         try:
             session.commit()
         except Exception as err:
-            print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+            logging.error('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
             session.rollback()
 
 
@@ -69,7 +70,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            print('Произошла ошибка при сохранении Поста, Текст ошибки:', err)
+            logging.error('Произошла ошибка при сохранении Поста, Текст ошибки:', err)
             session.rollback()
 
     def update(self, input_data: dict):
@@ -86,7 +87,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+            logging.error('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
             session.rollback()
 
     def update_tonal_comments(self, tone, where_post):
@@ -106,7 +107,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
+            logging.error('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
             session.rollback()
 
 
@@ -130,7 +131,7 @@ class CommentService:
         try:
             session.commit()
         except Exception as err:
-            print('Произошла ошибка при сохранении Комментария, Текст ошибки:', err)
+            logging.error('Произошла ошибка при сохранении Комментария, Текст ошибки:', err)
             session.rollback()
 
     def update(self, input_data: dict):
@@ -145,5 +146,5 @@ class CommentService:
         try:
             session.commit()
         except Exception as err:
-            print('Произошла ошибка при обновлении Комментария, Текст ошибки:', err)
+            logging.error('Произошла ошибка при обновлении Комментария, Текст ошибки:', err)
             session.rollback()
