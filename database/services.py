@@ -8,6 +8,10 @@ class GroupService:
         self.group = group
 
     def add(self, input_data: dict):
+        """
+        Функция принимает словарь с данными группы
+        и добавляет эти данные бд, если их не существует
+        """
         new_group = self.group(
             group_id=input_data['group_id'],
             group_name=input_data['name'],
@@ -85,72 +89,11 @@ class PostService:
             print('Произошла ошибка при обновлении Поста, Текст ошибки:', err)
             session.rollback()
 
-    def get_statistic(self, input_data: dict):
-        """
-        Функция принимает словарь со значениями
-        периода времени и группы
-        Далее функция возвращает словарь со статистикой
-        """
-
-        if session.query(self.post).filter(self.post.group == input_data['name']).first():
-            # Количество постов за период
-            posts = session.query(func.count(self.post.post_id)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date']
-            ).first()[0]
-
-            # Количество постов с фото/видео за период
-            post_with_photo = session.query(func.count(self.post.post_id)).filter(
-                self.post.group == input_data['name'],
-                self.post.date >= input_data['date'],
-                self.post.photo == 'true'
-            ).first()[0]
-
-            def get_sum_record(data, query_param):
-                parameter = session.query(func.sum(query_param)).filter(
-                    self.post.group == data['name'],
-                    self.post.date >= data['date'],
-                ).first()[0]
-                return parameter
-
-            def get_most_value_record(data, query_param):
-                max_value_record = session.query(func.max(query_param)).filter(
-                    self.post.group == data['name'],
-                    self.post.date >= data['date']
-                ).first()[0]
-                owner_id = session.query(self.post.owner_id).filter(
-                    self.post.group == data['name'],
-                    self.post.date >= data['date'],
-                    query_param == max_value_record
-                ).first()[0]
-                post_id = session.query(self.post.post_id).filter(
-                    self.post.owner_id == owner_id,
-                    query_param == max_value_record
-                ).first()[0]
-                return {'owner_id': owner_id, 'post_id': post_id}
-
-            def get_url_most_value_record(data, query_param):
-                params = get_most_value_record(data, query_param)
-                owner_id = params['owner_id']
-                post_id = params['post_id']
-                return f'https://vk.com/{data["name"]}?w=wall{owner_id}_{post_id}'
-
-            statistic = {
-                'count_post': posts,
-                'posts_with_photo': post_with_photo,
-                'likes': get_sum_record(input_data, self.post.likes),
-                'views': get_sum_record(input_data, self.post.views),
-                'comments': get_sum_record(input_data, self.post.quantity_comments),
-                'reposts': get_sum_record(input_data, self.post.reposts),
-                'negative_post': get_url_most_value_record(input_data, self.post.negative_comments),
-                'positive_post': get_url_most_value_record(input_data, self.post.positive_comments),
-                'popular_post': get_url_most_value_record(input_data, self.post.views)
-            }
-            return statistic
-        else:
-            return False
-
     def update_tonal_comments(self, tone, where_post):
+        """
+        Функция принимает тон комментария и ID поста
+        и обновляет эти параметры в бд
+        """
         if tone == 'positive':
             column = {'positive_comments': (self.post.positive_comments + 1)}
         elif tone == 'negative':
