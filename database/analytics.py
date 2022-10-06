@@ -1,5 +1,3 @@
-import time
-
 from sqlalchemy import func
 from loader import session
 
