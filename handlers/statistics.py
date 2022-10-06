@@ -6,8 +6,8 @@ from loader import dp
 
 from datetime import datetime, timedelta
 
-from database import PostService
-from database.models import Post
+from database import Analytics
+from database.models import Group, Post
 
 
 class FSMDate(StatesGroup):
@@ -31,11 +31,14 @@ async def load_name(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=FSMDate.days, content_types=['text'])
 async def load_period(message: types.Message, state: FSMContext):
-    post_service = PostService(Post)
+    analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
         data['date'] = datetime.now() - timedelta(days=int(message.text))
 
-    statistics = post_service.get_statistic(data)
+    statistics = analysis.get_statistic(data)
+    most_positive_post = analysis.get_tops_stats(data, Post.positive_comments)
+    most_negative_post = analysis.get_tops_stats(data, Post.negative_comments)
+    most_popular_post = analysis.get_tops_stats(data, Post.views)
 
     if statistics:
         text = f"""
@@ -45,9 +48,9 @@ async def load_period(message: types.Message, state: FSMContext):
 Комментарии: {statistics["comments"]}
 Репосты: {statistics["reposts"]}
 Всего просмотров: {statistics["views"]}\n\n
-{hlink("Самый популярный пост", statistics["popular_post"])}
-{hlink("Самый позитивный пост", statistics["positive_post"])}
-{hlink("Самый негативный пост", statistics["negative_post"])}
+{hlink("Самый популярный пост", most_popular_post)}
+{hlink("Самый позитивный пост", most_positive_post)}
+{hlink("Самый негативный пост", most_negative_post)}
 """
         parse_mode = 'html'
     else:
