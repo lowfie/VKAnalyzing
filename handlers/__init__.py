@@ -1,3 +1,3 @@
 from . import start
-from . import parsing_group
+from . import parse_group
 from . import statistics
