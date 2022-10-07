@@ -1,19 +1,26 @@
 from aiogram import executor
 from loader import dp
 
-import handlers
-
 from database.models import create_tables
 
-import logging
+from loguru import logger
 
+import handlers
 
-logging.basicConfig(filename='logs.log', level=logging.INFO)
+logger.add(
+    'logs.log',
+    format='{time} : {level} : {message}',
+    level='INFO',
+    rotation='20 MB'
+)
 
 
 async def on_startup(dispatcher):
-    logging.info('Bot started')
-    create_tables()
+    try:
+        logger.info('the bot has been successfully start')
+        create_tables()
+    except Exception as err:
+        logger.error(f'Ошибка инициализации БД:\n{err}')
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
