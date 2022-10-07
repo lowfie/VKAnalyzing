@@ -11,6 +11,7 @@ class Group(Base):
     group_name = Column('group_name', Text)
     screen_name = Column('screen_name', Text)
     group_members = Column('members', Integer, default=0)
+    autoparse = Column('is_autoparse', Boolean, default=False)
     post = relationship('Post', lazy='select')
 
 
