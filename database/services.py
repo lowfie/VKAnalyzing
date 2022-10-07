@@ -23,7 +23,7 @@ class GroupService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении Поста, Текст ошибки:\n{err}')
+            logger.error(f'Произошла ошибка при сохранении группы:\n{err}')
             session.rollback()
 
     def update(self, input_data: dict):
@@ -33,14 +33,14 @@ class GroupService:
         """
         group = session.query(self.group).filter(self.group.group_id == input_data['group_id']).first()
         if not group:
-            raise ValueError('Такого поста нет в бд')
+            logger.warning(f'Такой группы нет в бд: {group}')
         group.group_name = input_data['name']
         group.screen_name = input_data['screen_name']
         group.group_members = input_data['members']
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении Поста, Текст ошибки:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении группы:\n{err}')
             session.rollback()
 
 
@@ -70,7 +70,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении Поста, Текст ошибки:\n{err}')
+            logger.error(f'Произошла ошибка при сохранении поста:\n{err}')
             session.rollback()
 
     def update(self, input_data: dict):
@@ -80,14 +80,14 @@ class PostService:
         """
         post = session.query(self.post).filter(self.post.post_id == input_data['post_id']).first()
         if not post:
-            raise ValueError('Такого поста нет в бд')
+            logger.warning(f'Такого поста нет в бд: {post}')
         post.quantity_comments = input_data['quantity_comments']
         post.likes = input_data['likes']
         post.views = input_data['views']
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении Поста, Текст ошибки:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении поста:\n{err}')
             session.rollback()
 
     def update_tonal_comments(self, tone, where_post):
@@ -107,7 +107,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении Поста, Текст ошибки:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении тональности:\n{err}')
             session.rollback()
 
 
@@ -131,7 +131,7 @@ class CommentService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении Поста, Текст ошибки:\n{err}')
+            logger.error(f'Произошла ошибка при сохранении комментария:\n{err}')
             session.rollback()
 
     def update(self, input_data: dict):
@@ -141,10 +141,10 @@ class CommentService:
         """
         comment = session.query(self.comment).filter(self.comment.comment_id == input_data['comment_id']).first()
         if not comment:
-            raise ValueError('Такого комментария нет в бд')
+            logger.warning(f'Такого комментария нет в бд {comment}')
         comment.text = input_data['text']
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении Поста, Текст ошибки:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении комментария:\n{err}')
             session.rollback()
