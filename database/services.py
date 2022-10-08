@@ -34,6 +34,7 @@ class GroupService:
         group = session.query(self.group).filter(self.group.group_id == input_data['group_id']).first()
         if not group:
             logger.warning(f'Такой группы нет в бд: {group}')
+            raise ValueError('Такой группы нет в бд')
         group.group_name = input_data['name']
         group.screen_name = input_data['screen_name']
         group.group_members = input_data['members']
@@ -91,6 +92,7 @@ class PostService:
         post = session.query(self.post).filter(self.post.post_id == input_data['post_id']).first()
         if not post:
             logger.warning(f'Такого поста нет в бд: {post}')
+            raise ValueError('Такого поста нет в бд')
         post.quantity_comments = input_data['quantity_comments']
         post.likes = input_data['likes']
         post.views = input_data['views']
@@ -152,6 +154,7 @@ class CommentService:
         comment = session.query(self.comment).filter(self.comment.comment_id == input_data['comment_id']).first()
         if not comment:
             logger.warning(f'Такого комментария нет в бд {comment}')
+            raise ValueError('Такого комментария нет в бд')
         comment.text = input_data['text']
         try:
             session.commit()
