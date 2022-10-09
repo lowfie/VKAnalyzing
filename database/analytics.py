@@ -53,8 +53,6 @@ class Analytics:
                 'reposts': get_sum_record(input_data, self.post.reposts),
             }
             return statistic
-        else:
-            return False
 
     def get_tops_stats(self, input_data: dict, query_param):
         """
@@ -80,5 +78,3 @@ class Analytics:
                 query_param == max_value_record
             ).first()[0]
             return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
-        else:
-            return False
