@@ -1,6 +1,8 @@
 from sqlalchemy import func
 from loader import session
 
+from database.services import GroupService
+
 
 class Analytics:
     """
@@ -12,24 +14,14 @@ class Analytics:
         self.group = group
         self.post = post
 
-    def get_group_id(self, screen_name):
-        """
-        Функция принимает название группы и отдаёт её ID
-        """
-        group_id = session.query(self.post.group_id).join(
-            self.group, self.post.group_id == self.group.group_id
-        ).filter(
-            self.group.screen_name == screen_name).first()
-        group_id = group_id[0] if group_id else group_id
-        return group_id
-
     def get_statistic(self, input_data: dict):
         """
         Функция принимает словарь со значениями
         периода времени и группы
         Далее функция возвращает словарь со статистикой
         """
-        group_id = self.get_group_id(input_data['name'])
+        service_group = GroupService(self.group)
+        group_id = service_group.get_group_id(input_data['name'])
 
         if group_id:
             # Количество постов за период
@@ -61,8 +53,6 @@ class Analytics:
                 'reposts': get_sum_record(input_data, self.post.reposts),
             }
             return statistic
-        else:
-            return False
 
     def get_tops_stats(self, input_data: dict, query_param):
         """
@@ -70,7 +60,8 @@ class Analytics:
         Ведёт подсчёт максимального параметра и на основе этого
         возвращает ссылку на пост
         """
-        group_id = self.get_group_id(input_data['name'])
+        service_group = GroupService(self.group)
+        group_id = service_group.get_group_id(input_data['name'])
 
         if group_id:
             max_value_record = session.query(func.max(query_param)).filter(
@@ -87,5 +78,3 @@ class Analytics:
                 query_param == max_value_record
             ).first()[0]
             return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
-        else:
-            return False

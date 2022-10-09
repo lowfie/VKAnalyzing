@@ -4,7 +4,7 @@ from loader import dp
 from modules.parse_vk_group import VkParser
 
 
-@dp.message_handler(commands='group')
+@dp.message_handler(commands='parse')
 async def parser_metadata_group(message: types.Message):
     text = message.text
     parser_vk = VkParser()
