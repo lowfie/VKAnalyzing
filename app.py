@@ -8,7 +8,7 @@ from loguru import logger
 import handlers
 
 logger.add(
-    'logs/{time} logs.log',
+    'logs/{time:YYYY-MM-DD} logs.log',
     format='{time} : {level} : {message}',
     level='INFO',
     rotation='1 day'
