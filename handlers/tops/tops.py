@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from database import Analytics
 from database.models import Group, Post
 
+from loguru import logger
+
 from .tops_state import TopsFormState
 
 
@@ -29,7 +31,14 @@ async def load_name(message: types.Message, state: FSMContext):
 async def load_period(message: types.Message, state: FSMContext):
     analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
-        data['date'] = str(datetime.now() - timedelta(days=int(message.text)))[:-7]
+        try:
+            days = timedelta(days=int(message.text))
+        except (OverflowError, ValueError) as err:
+            logger.warning(f'В команде /tops указан неверный параметр периода: {err}')
+            await message.reply('Вы ввели некорректное значение, поэтому будет использоваться неделя, как период')
+            days = timedelta(days=7)
+
+        data['date'] = str(datetime.now() - days)[:-7]
 
         most_positive_post = analysis.get_tops_stats(data, Post.positive_comments)
         most_negative_post = analysis.get_tops_stats(data, Post.negative_comments)
