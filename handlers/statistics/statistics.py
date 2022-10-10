@@ -1,6 +1,5 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.utils.markdown import hlink
 from loader import dp
 
 from datetime import datetime, timedelta
