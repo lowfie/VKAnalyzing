@@ -20,7 +20,7 @@ async def on_startup(dispatcher):
         logger.info('the bot has been successfully start')
         create_tables()
     except Exception as err:
-        logger.error(f'Ошибка инициализации БД:\n{err}')
+        logger.error(f'Ошибка инициализации БД: {err}')
 
 
 async def on_shutdown(dispatcher):

@@ -23,7 +23,7 @@ class GroupService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении группы:\n{err}')
+            logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
     def update(self, input_data: dict):
@@ -41,7 +41,7 @@ class GroupService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении группы:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении группы: {err}')
             session.rollback()
 
     def get_group_id(self, screen_name):
@@ -81,7 +81,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении поста:\n{err}')
+            logger.error(f'Произошла ошибка при сохранении поста: {err}')
             session.rollback()
 
     def update(self, input_data: dict):
@@ -99,7 +99,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении поста:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении поста: {err}')
             session.rollback()
 
     def update_tonal_comments(self, tone, where_post):
@@ -119,7 +119,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении тональности:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении тональности: {err}')
             session.rollback()
 
 
@@ -143,7 +143,7 @@ class CommentService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении комментария:\n{err}')
+            logger.error(f'Произошла ошибка при сохранении комментария: {err}')
             session.rollback()
 
     def update(self, input_data: dict):
@@ -159,5 +159,5 @@ class CommentService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении комментария:\n{err}')
+            logger.error(f'Произошла ошибка при обновлении комментария: {err}')
             session.rollback()
