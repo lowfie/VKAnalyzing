@@ -50,8 +50,8 @@ async def load_period(message: types.Message, state: FSMContext):
                    f'{hlink("Самый негативный пост", most_negative_post)}\n'
             parse_mode = 'html'
         else:
-            text = f'К сожалению группы {data["name"]} нету в базе\n' \
-                   f'Вы можете её добавить написать /parse <name>'
+            text = f'К сожалению группы <b>{data["name"]}</b> нету в базе\n' \
+                   f'Вы можете её добавить написать /parse name'
             parse_mode = None
 
         await dp.bot.send_message(

@@ -11,10 +11,10 @@ async def parser_metadata_group(message: types.Message):
 
     if len(text.split()) == 2:
         group = text.split()[1]
-        text = f'Парсинг группы {group} закончился'
+        text = f'Парсинг группы <b>{group}</b> закончился'
         await parser_vk.run_vk_parser(group)
     else:
-        text = 'Попробуй ещё раз.'
+        text = 'Что-то пошло не так. Попробуй ещё раз.'
 
     await dp.bot.send_message(
         chat_id=message.chat.id,

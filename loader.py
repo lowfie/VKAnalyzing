@@ -8,6 +8,7 @@ from data.config import PREFIX_REDIS, PASSWORD_REDIS, HOST_REDIS, PORT_REDIS, DA
 
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
+from aiogram import types
 
 # Создание сессии для коммуникации с бд
 engine = create_engine(
@@ -28,5 +29,5 @@ redis_storage = RedisStorage2(
     prefix=PREFIX_REDIS)
 
 # Подключение к апи телеграмм бота
-bot = Bot(BOT_TOKEN)
+bot = Bot(BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot=bot, storage=redis_storage)

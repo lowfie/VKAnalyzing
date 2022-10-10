@@ -42,15 +42,15 @@ async def load_period(message: types.Message, state: FSMContext):
         statistics = analysis.get_statistic(data)
 
         if statistics:
-            text = f'Собрано {statistics["count_post"]} постов за период\n' \
-                   f'Посты с фото/видео: {statistics["posts_with_photo"]}\n' \
-                   f'Лайки: {statistics["likes"]}\n' \
-                   f'Комментарии: {statistics["comments"]}\n' \
-                   f'Репосты: {statistics["reposts"]}\n' \
-                   f'Всего просмотров: {statistics["views"]}'
+            text = f'Собрано <b>{statistics["count_post"]}</b> постов за период\n' \
+                   f'Посты с фото/видео: <b>{statistics["posts_with_photo"]}</b>\n' \
+                   f'Лайки: <b>{statistics["likes"]}</b>\n' \
+                   f'Комментарии: <b>{statistics["comments"]}</b>\n' \
+                   f'Репосты: <b>{statistics["reposts"]}</b>\n' \
+                   f'Всего просмотров: <b>{statistics["views"]}</b>'
         else:
-            text = f'К сожалению группы {data["name"]} нету в базе\n' \
-                   f'Вы можете её добавить написать /parse <name>'
+            text = f'К сожалению группы </b>{data["name"]}</b> нету в базе\n' \
+                   f'Вы можете её добавить написать /parse name'
 
         await dp.bot.send_message(
             chat_id=message.chat.id,

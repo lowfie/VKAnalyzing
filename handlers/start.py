@@ -6,5 +6,5 @@ from loader import dp
 async def bot_start(message: types.Message):
     await dp.bot.send_message(
         chat_id=message.chat.id,
-        text='Аналитический бот готов к работе'
+        text='<b>Аналитический бот готов к работе</b>'
     )
