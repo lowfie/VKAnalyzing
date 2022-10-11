@@ -10,6 +10,7 @@ from database.models import Group, Post
 from loguru import logger
 
 from .statistics_state import StatisticsFormState
+from handlers.cancel_state_handler import cancel_handler
 
 
 @dp.message_handler(commands='stats', state=None)
