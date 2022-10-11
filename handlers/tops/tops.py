@@ -41,18 +41,19 @@ async def load_period(message: types.Message, state: FSMContext):
 
         data['date'] = str(datetime.now() - days)[:-7]
 
-        most_positive_post = analysis.get_tops_stats(data, Post.positive_comments)
-        most_negative_post = analysis.get_tops_stats(data, Post.negative_comments)
-        most_popular_post = analysis.get_tops_stats(data, Post.views)
+        most_positive_post = analysis.get_top_stats(data, Post.positive_comments)
+        most_negative_post = analysis.get_top_stats(data, Post.negative_comments)
+        most_popular_post = analysis.get_top_stats(data, Post.views)
 
-        if most_popular_post and most_negative_post and most_popular_post:
+        if (most_popular_post and most_negative_post and most_popular_post) is not None:
             text = f'{hlink("Самый популярный пост", most_popular_post)}\n' \
                    f'{hlink("Самый позитивный пост", most_positive_post)}\n' \
                    f'{hlink("Самый негативный пост", most_negative_post)}\n'
             parse_mode = 'html'
         else:
-            text = f'К сожалению группы <b>{data["name"]}</b> нету в базе\n' \
-                   f'Вы можете её добавить написать <code>/parse group_name</code>'
+            text = f'Не удалось собрать статистику группы <b>{data["name"]}</b>\n' \
+                   f'Добавьте группу или укажите больший период\n' \
+                   f'Вы можете добавить группу написав <code>/parse group_name</code>'
             parse_mode = None
 
         await dp.bot.send_message(

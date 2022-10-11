@@ -54,7 +54,7 @@ class Analytics:
             }
             return statistic
 
-    def get_tops_stats(self, input_data: dict, query_param):
+    def get_top_stats(self, input_data: dict, query_param):
         """
         Функция принимает словарь со значением и параметром.
         Ведёт подсчёт максимального параметра и на основе этого
@@ -68,13 +68,16 @@ class Analytics:
                 self.post.group_id == group_id,
                 self.post.date >= input_data['date']
             ).first()[0]
-            owner_id = session.query(self.post.owner_id).filter(
-                self.post.group_id == group_id,
-                self.post.date >= input_data['date'],
-                query_param == max_value_record
-            ).first()[0]
-            post_id = session.query(self.post.post_id).filter(
-                self.post.owner_id == owner_id,
-                query_param == max_value_record
-            ).first()[0]
-            return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+            if max_value_record:
+                owner_id = session.query(self.post.owner_id).filter(
+                    self.post.group_id == group_id,
+                    self.post.date >= input_data['date'],
+                    query_param == max_value_record
+                ).first()[0]
+                post_id = session.query(self.post.post_id).filter(
+                    self.post.owner_id == owner_id,
+                    query_param == max_value_record
+                ).first()[0]
+                return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+            else:
+                return
