@@ -42,6 +42,6 @@ class Comment(Base):
     tone = Column('tone', Text)
 
 
-def create_tables():
+def create_tables() -> None:
     """Автоматическое создание моделей при запуске"""
     Base.metadata.create_all(bind=engine)

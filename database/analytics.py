@@ -1,7 +1,10 @@
 from sqlalchemy import func
-from loader import session
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from loader import session, Base
 
 from database.services import GroupService
+
+from typing import Any
 
 
 class Analytics:
@@ -10,11 +13,11 @@ class Analytics:
     И на их основе аналитика
     """
 
-    def __init__(self, group, post):
+    def __init__(self, group: Base, post: Base) -> None:
         self.group = group
         self.post = post
 
-    def get_statistic(self, input_data: dict):
+    def get_statistic(self, input_data: dict[str, str]) -> dict[str, Any] | None:
         """
         Функция принимает словарь со значениями
         периода времени и группы
@@ -37,12 +40,12 @@ class Analytics:
                 self.post.photo == 'true'
             ).first()[0]
 
-            def get_sum_record(data, query_param):
+            def get_sum_record(data: dict[str, str], query_param: InstrumentedAttribute) -> int:
                 parameter = session.query(func.sum(query_param)).filter(
                     self.post.group_id == group_id,
                     self.post.date >= data['date'],
                 ).first()[0]
-                return parameter
+                return int(parameter)
 
             statistic = {
                 'count_post': posts,
@@ -53,8 +56,9 @@ class Analytics:
                 'reposts': get_sum_record(input_data, self.post.reposts),
             }
             return statistic
+        return None
 
-    def get_top_stats(self, input_data: dict, query_param):
+    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> str | None:
         """
         Функция принимает словарь со значением и параметром.
         Ведёт подсчёт максимального параметра и на основе этого
@@ -79,5 +83,4 @@ class Analytics:
                     query_param == max_value_record
                 ).first()[0]
                 return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
-            else:
-                return
+        return None

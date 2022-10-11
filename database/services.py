@@ -2,13 +2,17 @@ from loader import session
 
 from loguru import logger
 
+from typing import Any
+from loader import Base
+
 
 class GroupService:
 
-    def __init__(self, group):
+    def __init__(self, group: Base) -> None:
         self.group = group
+        print(type(self.group))
 
-    def add(self, input_data: dict):
+    def add(self, input_data: dict[str, Any]) -> None:
         """
         Функция принимает словарь с данными группы
         и добавляет эти данные бд, если их не существует
@@ -26,7 +30,7 @@ class GroupService:
             logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
-    def update(self, input_data: dict):
+    def update(self, input_data: dict[str, Any]) -> None:
         """
         Функция принимает словарь с данными
         и обновляет их
@@ -44,7 +48,7 @@ class GroupService:
             logger.error(f'Произошла ошибка при обновлении группы: {err}')
             session.rollback()
 
-    def get_group_id(self, screen_name):
+    def get_group_id(self, screen_name: str) -> int | None:
         """
         Функция принимает название группы и отдаёт её ID
         """
@@ -57,10 +61,10 @@ class GroupService:
 
 class PostService:
 
-    def __init__(self, post):
+    def __init__(self, post: Base) -> None:
         self.post = post
 
-    def add(self, input_data: dict):
+    def add(self, input_data: dict[str, Any]) -> None:
         """
         Функция принимает словарь с данными поста
         и добавляет эти данные бд, если их не существует
@@ -84,7 +88,7 @@ class PostService:
             logger.error(f'Произошла ошибка при сохранении поста: {err}')
             session.rollback()
 
-    def update(self, input_data: dict):
+    def update(self, input_data: dict[str, Any]) -> None:
         """
         Функция принимает словарь с данными
         и обновляет их
@@ -102,7 +106,7 @@ class PostService:
             logger.error(f'Произошла ошибка при обновлении поста: {err}')
             session.rollback()
 
-    def update_tonal_comments(self, tone, where_post):
+    def update_tonal_comments(self, tone: str | None, where_post: int) -> None:
         """
         Функция принимает тон комментария и ID поста
         и обновляет эти параметры в бд
@@ -125,10 +129,10 @@ class PostService:
 
 class CommentService:
 
-    def __init__(self, comment):
+    def __init__(self, comment: Base) -> None:
         self.comment = comment
 
-    def add(self, input_data: dict):
+    def add(self, input_data: dict[str, Any]) -> None:
         """
         Функция принимает словарь метаданных комментария
         И добавляет в бд
@@ -146,7 +150,7 @@ class CommentService:
             logger.error(f'Произошла ошибка при сохранении комментария: {err}')
             session.rollback()
 
-    def update(self, input_data: dict):
+    def update(self, input_data: dict[str, Any]) -> None:
         """
         Функция принимает на вход метаданные комментария
         и обновляет их
