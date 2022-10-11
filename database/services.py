@@ -10,7 +10,6 @@ class GroupService:
 
     def __init__(self, group: Base) -> None:
         self.group = group
-        print(type(self.group))
 
     def add(self, input_data: dict[str, Any]) -> None:
         """
