@@ -2,13 +2,19 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from data.config import USER_DB, PASSWORD_DB, HOST_PORT, DATABASE, BOT_TOKEN
+from data.config import (
+    BOT_TOKEN,
+    USER_POSTGRES, PASSWORD_POSTGRES, HOST_POSTGRES, PORT_POSTGRES, DATABASE_POSTGRES,
+    PREFIX_REDIS, PASSWORD_REDIS, HOST_REDIS, PORT_REDIS, DATABASE_REDIS
+)
 
 from aiogram import Bot, Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
+from aiogram import types
 
 # Создание сессии для коммуникации с бд
-engine = create_engine(f"postgresql://{USER_DB}:{PASSWORD_DB}@{HOST_PORT}/{DATABASE}")
+engine = create_engine(
+    f"postgresql://{USER_POSTGRES}:{PASSWORD_POSTGRES}@{HOST_POSTGRES}:{PORT_POSTGRES}/{DATABASE_POSTGRES}")
 session = scoped_session(sessionmaker(bind=engine))
 
 # Создание моделей в бд
@@ -16,9 +22,9 @@ Base = declarative_base()
 Base.query = session.query_property()
 
 # Работа с машиной состояния
-storage = MemoryStorage()
+redis_storage = RedisStorage2(
+    host=HOST_REDIS, port=PORT_REDIS, db=DATABASE_REDIS, pool_size=10, password=PASSWORD_REDIS, prefix=PREFIX_REDIS)
 
 # Подключение к апи телеграмм бота
-bot = Bot(BOT_TOKEN)
-dp = Dispatcher(bot=bot, storage=storage)
-
+bot = Bot(BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+dp = Dispatcher(bot=bot, storage=redis_storage)

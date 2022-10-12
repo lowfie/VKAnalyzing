@@ -12,7 +12,7 @@ from modules.sentiment_neural_network import SentimentalAnalysisModel
 
 
 class VkParser:
-    def __init__(self):
+    def __init__(self) -> None:
         self.url = 'https://api.vk.com/method/'
         self.wall_get = self.url + 'wall.get'
         self.wall_getComments = self.url + 'wall.getComments'
@@ -23,7 +23,7 @@ class VkParser:
         self.group_metadata = []
         self.sentiment_model = SentimentalAnalysisModel()
 
-    async def get_group_byid(self, group):
+    async def get_group_byid(self, group: str) -> None:
         """
         Функция принимает на вход имя в ссылке группы и собирает данные
         Далее она сохраняет в бд и передаёт параметры для сбора постов
@@ -56,7 +56,7 @@ class VkParser:
         else:
             service_group.update(group_data)
 
-    async def get_posts(self):
+    async def get_posts(self) -> None:
         """
         Парсинг данных последних постов из группы вк
         И занесение данных в бд
@@ -96,7 +96,7 @@ class VkParser:
                 else:
                     service_post.update(post_data)
 
-    async def get_wall_comments(self):
+    async def get_wall_comments(self) -> None:
         """
         Парсинг комментариев поста
         И занесение данных в бд
@@ -138,7 +138,7 @@ class VkParser:
                     else:
                         service_comment.update(comment_data)
 
-    async def run_vk_parser(self, group):
+    async def run_vk_parser(self, group: str) -> None:
         tasks = [
             self.get_group_byid(group),
             self.get_posts(),
