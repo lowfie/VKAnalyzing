@@ -8,6 +8,8 @@ from database.models import Post, Comment, Group
 from database import PostService, CommentService, GroupService
 from loader import session
 
+from typing import Any
+
 from modules.sentiment_neural_network import SentimentalAnalysisModel
 
 
@@ -19,8 +21,8 @@ class VkParser:
         self.groups_getGroup = self.url + 'groups.getById'
         self.groups_getMembers = self.url + 'groups.getMembers'
         self.vk_version = 5.131
-        self.posts_metadata = []
-        self.group_metadata = []
+        self.posts_metadata: list[dict[str, Any]] = []
+        self.group_metadata: list[dict[str, Any]] = []
         self.sentiment_model = SentimentalAnalysisModel()
 
     async def get_group_byid(self, group: str) -> None:
