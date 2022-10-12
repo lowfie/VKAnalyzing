@@ -57,6 +57,29 @@ class GroupService:
         group_id = group_id[0] if group_id else group_id
         return group_id
 
+    def set_autoparsing_group(self, group_name: str) -> bool | None:
+        """
+        Группа принимает на вход название группы,
+        ищет её ID в таблице с группами и меняет
+        значение в колонке autoparse
+        """
+        group_id = self.get_group_id(group_name)
+        if not group_id:
+            return None
+        else:
+            autoparsing_status = session.query(self.group.autoparse).filter(
+                self.group.group_id == group_id).first()[0]
+            column = {'autoparse': not autoparsing_status}
+
+            session.query(self.group).filter(self.group.group_id == self.get_group_id(group_name)).update(column)
+
+            try:
+                session.commit()
+            except Exception as err:
+                logger.error(f'Произошла ошибка при обновлении статуса авто-парсинга: {err}')
+                session.rollback()
+            return not autoparsing_status
+
 
 class PostService:
 
