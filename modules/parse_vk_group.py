@@ -22,6 +22,7 @@ class VkParser:
         self.groups_getMembers = self.url + 'groups.getMembers'
         self.vk_version = 5.131
         self.posts_metadata: list[dict[str, Any]] = []
+        self.posts_update_metadata: list[dict[str, Any]] = []
         self.group_metadata: list[dict[str, Any]] = []
         self.sentiment_model = SentimentalAnalysisModel()
 
@@ -42,9 +43,9 @@ class VkParser:
 
         group_data = {
             'group_id': get_group['id'],
-            'name': get_group['name'],
+            'group_name': get_group['name'],
             'screen_name': get_group['screen_name'],
-            'members': get_group_members['count']
+            'group_members': get_group_members['count']
         }
         # Инициализация класса для сохранения в бд
         service_group = GroupService(Group)
@@ -54,9 +55,9 @@ class VkParser:
 
         # Сохранение и обновление данных в бд
         if session.query(Group).filter(Group.group_id == group_data['group_id']).first() is None:
-            service_group.add(group_data)
+            service_group.add_all(self.group_metadata)
         else:
-            service_group.update(group_data)
+            service_group.update_all(self.group_metadata)
 
     async def get_posts(self) -> None:
         """
@@ -75,11 +76,8 @@ class VkParser:
             # Инициализация класса для сохранения в бд
             service_post = PostService(Post)
 
-            # Список из 40 последних постов
-            items = [item for item in response['response']['items']]
-
-            for item in items:
-                self.posts_metadata.append({'post_id': item['id'], 'owner_id': item['owner_id']})
+            # Список из 60 последних постов
+            for item in response['response']['items']:
                 # Добавление данных в таблицу posts
                 post_data = {
                     'post_id': item['id'],
@@ -90,13 +88,16 @@ class VkParser:
                     'reposts': item['reposts']['count'],
                     'views': item['views']['count'],
                     'photo': True if 'attachments' in item else False,
-                    'text': item['text'],
+                    'post_text': item['text'],
                     'date': datetime.fromtimestamp(item['date'])
                 }
                 if session.query(Post).filter(Post.post_id == post_data['post_id']).first() is None:
-                    service_post.add(post_data)
+                    self.posts_metadata.append(post_data)
                 else:
-                    service_post.update(post_data)
+                    self.posts_update_metadata.append(post_data)
+
+            service_post.add_all(self.posts_metadata)
+            service_post.update_all(self.posts_update_metadata)
 
     async def get_wall_comments(self) -> None:
         """
