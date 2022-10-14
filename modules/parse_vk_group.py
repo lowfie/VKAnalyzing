@@ -1,6 +1,7 @@
-from data.config import VK_TOKEN
 import httpx
 import asyncio
+
+from data.config import VK_TOKEN
 
 from datetime import datetime
 
@@ -10,20 +11,29 @@ from loader import session
 
 from typing import Any
 
+from loguru import logger
+
 from modules.sentiment_neural_network import SentimentalAnalysisModel
 
 
 class VkParser:
     def __init__(self) -> None:
+        # Объекты для VK_API
         self.url = 'https://api.vk.com/method/'
         self.wall_get = self.url + 'wall.get'
         self.wall_getComments = self.url + 'wall.getComments'
         self.groups_getGroup = self.url + 'groups.getById'
         self.groups_getMembers = self.url + 'groups.getMembers'
         self.vk_version = 5.131
+
+        # Объекты для базы данных
+        self.group_metadata: list[dict[str, Any]] = []
         self.posts_metadata: list[dict[str, Any]] = []
         self.posts_update_metadata: list[dict[str, Any]] = []
-        self.group_metadata: list[dict[str, Any]] = []
+        self.comments_metadata: list[dict[str, Any]] = []
+        self.comments_update_metadata: list[dict[str, Any]] = []
+
+        # Инициализация модели нейросети для анализа тональности текста
         self.sentiment_model = SentimentalAnalysisModel()
 
     async def get_group_byid(self, group: str) -> None:
@@ -32,14 +42,23 @@ class VkParser:
         Далее она сохраняет в бд и передаёт параметры для сбора постов
         И комментариев
         """
-        params = {
+        logger.info(f'Начался сбор групп')
+
+        params_get_group = {
             'group_id': group,
             'access_token': VK_TOKEN,
             'count': 0,
             'v': self.vk_version
         }
-        get_group = httpx.get(self.groups_getGroup, params=params).json()['response'][0]
-        get_group_members = httpx.get(self.groups_getMembers, params=params).json()['response']
+        get_group = httpx.get(self.groups_getGroup, params=params_get_group).json()['response'][0]
+
+        params_group_members = {
+            'group_id': get_group['id'],
+            'access_token': VK_TOKEN,
+            'count': 0,
+            'v': self.vk_version
+        }
+        get_group_members = httpx.get(self.groups_getMembers, params=params_group_members).json()['response']
 
         group_data = {
             'group_id': get_group['id'],
@@ -47,13 +66,14 @@ class VkParser:
             'screen_name': get_group['screen_name'],
             'group_members': get_group_members['count']
         }
+
         # Инициализация класса для сохранения в бд
         service_group = GroupService(Group)
 
         # Формирование списка с данным для сбора постов
         self.group_metadata.append(group_data)
 
-        # Сохранение и обновление данных в бд
+        # Сохранение и обновление данных групп в бд
         if session.query(Group).filter(Group.group_id == group_data['group_id']).first() is None:
             service_group.add_all(self.group_metadata)
         else:
@@ -64,6 +84,11 @@ class VkParser:
         Парсинг данных последних постов из группы вк
         И занесение данных в бд
         """
+        logger.info(f'Начался сбор постов')
+
+        # Инициализация класса для сохранения в бд
+        service_post = PostService(Post)
+
         for group in self.group_metadata:
             params = {
                 'domain': group['screen_name'],
@@ -72,9 +97,6 @@ class VkParser:
                 'v': self.vk_version
             }
             response = httpx.get(self.wall_get, params=params).json()
-
-            # Инициализация класса для сохранения в бд
-            service_post = PostService(Post)
 
             # Список из 60 последних постов
             for item in response['response']['items']:
@@ -96,14 +118,16 @@ class VkParser:
                 else:
                     self.posts_update_metadata.append(post_data)
 
-            service_post.add_all(self.posts_metadata)
-            service_post.update_all(self.posts_update_metadata)
+        # Сохранение данных постов в бд
+        service_post.add_all(self.posts_metadata)
+        service_post.update_all(self.posts_update_metadata)
 
     async def get_wall_comments(self) -> None:
         """
         Парсинг комментариев поста
         И занесение данных в бд
         """
+        logger.info(f'Начался сбор комментариев')
 
         # Инициализация класса для сохранения в бд
         service_comment = CommentService(Comment)
@@ -120,15 +144,16 @@ class VkParser:
                 'v': self.vk_version
             }
             response = httpx.get(self.wall_getComments, params=params).json()
+
             # Обход ограничение на 5 запросов в секунду
             if num % 4 == 0:
                 await asyncio.sleep(2)
 
             # Итерация всех комментариев поста
-            for item in response.get('response').get('items'):
+            for item in response['response']['items']:
                 if len(item['text'].split()) > 1:
                     # Добавление данных в бд
-                    tone = self.sentiment_model.set_tone_of_the_comment([item['text']])
+                    tone = self.sentiment_model.set_tone_comment([item['text']])
                     comment_data = {
                         'comment_id': item['id'],
                         'post_id': post['post_id'],
@@ -136,10 +161,13 @@ class VkParser:
                         'tone': tone
                     }
                     if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
-                        service_comment.add(comment_data)
+                        self.comments_metadata.append(comment_data)
                         service_post.update_tonal_comments(tone, post['post_id'])
                     else:
-                        service_comment.update(comment_data)
+                        self.comments_update_metadata.append(comment_data)
+
+        service_comment.add_all(self.comments_metadata)
+        service_comment.update_all(self.comments_update_metadata)
 
     async def run_vk_parser(self, group: str) -> None:
         tasks = [
