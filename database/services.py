@@ -124,36 +124,26 @@ class CommentService:
     def __init__(self, comment: Base) -> None:
         self.comment = comment
 
-    def add(self, input_data: dict[str, Any]) -> None:
+    def add_all(self, input_data: list[dict[str, Any]]) -> None:
         """
-        Функция принимает словарь метаданных комментария
-        И добавляет в бд
+        Функция принимает список словарей с данными комментариев
+        и добавляет эти данные бд
         """
-        new_comment = self.comment(
-            comment_id=input_data['comment_id'],
-            post_id=input_data['post_id'],
-            text=input_data['text'],
-            tone=input_data['tone']
-        )
-        session.add(new_comment)
+        session.bulk_insert_mappings(self.comment, input_data)
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении комментария: {err}')
+            logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
-    def update(self, input_data: dict[str, Any]) -> None:
+    def update_all(self, input_data: list[dict[str, Any]]) -> None:
         """
-        Функция принимает на вход метаданные комментария
-        и обновляет их
+        Функция принимает список словарей с данными комментариев
+        и обновляет их в бд
         """
-        comment = session.query(self.comment).filter(self.comment.comment_id == input_data['comment_id']).first()
-        if not comment:
-            logger.warning(f'Такого комментария нет в бд {comment}')
-            raise ValueError('Такого комментария нет в бд')
-        comment.text = input_data['text']
+        session.bulk_update_mappings(self.comment, input_data)
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении комментария: {err}')
+            logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
