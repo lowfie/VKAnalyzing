@@ -1,9 +1,13 @@
+import asyncio
+
 from aiogram import executor
 from loader import dp
 
 from database.models import create_tables
 
 from loguru import logger
+
+from modules.tasks import schedule
 
 import handlers
 
@@ -16,6 +20,7 @@ logger.add(
 
 
 async def on_startup(dispatcher):
+    asyncio.create_task(schedule())
     try:
         logger.info('the bot has been successfully start')
         create_tables()
