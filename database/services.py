@@ -55,9 +55,9 @@ class GroupService:
         if not group_id:
             return None
         else:
-            autoparsing_status = session.query(self.group.autoparse).filter(
+            autoparse_status = not session.query(self.group.autoparse).filter(
                 self.group.group_id == group_id).first()[0]
-            column = {'autoparse': not autoparsing_status}
+            column = {'autoparse': autoparse_status}
 
             session.query(self.group).filter(self.group.group_id == self.get_group_id(group_name)).update(column)
 
@@ -66,7 +66,7 @@ class GroupService:
             except Exception as err:
                 logger.error(f'Произошла ошибка при обновлении статуса авто-парсинга: {err}')
                 session.rollback()
-            return not autoparsing_status
+            return autoparse_status
 
 
 class PostService:
