@@ -22,9 +22,10 @@ async def autoparse_vk():
     ).all()
 
     for screen_name in groups_autoparse:
-        logger.info(f'Начался сбор группы {screen_name[0]}')
+        logger.info(f'Автопарсинг группы {screen_name[0]} начался')
         await asyncio.sleep(0.2)
         await vk_parser.run_vk_parser(screen_name[0])
+        logger.info(f'Автопарсинг группы {screen_name[0]} закончен')
 
 
 async def schedule():
