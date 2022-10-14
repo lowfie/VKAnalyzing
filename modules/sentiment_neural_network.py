@@ -8,7 +8,7 @@ class SentimentalAnalysisModel:
         self.tokenizer = RegexTokenizer()
         self.model = FastTextSocialNetworkModel(tokenizer=self.tokenizer)
 
-    def set_tone_of_the_comment(self, comment: list[str]) -> str | None:
+    def set_tone_comment(self, comment: list[str]) -> str | None:
         results = self.model.predict(comment, k=2)[0]
 
         for key, value in results.items():
