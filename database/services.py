@@ -11,40 +11,28 @@ class GroupService:
     def __init__(self, group: Base) -> None:
         self.group = group
 
-    def add(self, input_data: dict[str, Any]) -> None:
+    def add_all(self, input_data: list[dict[str, Any]]) -> None:
         """
-        Функция принимает словарь с данными группы
-        и добавляет эти данные бд, если их не существует
+        Функция принимает список словарей с данными групп
+        и добавляет эти данные бд
         """
-        new_group = self.group(
-            group_id=input_data['group_id'],
-            group_name=input_data['name'],
-            screen_name=input_data['screen_name'],
-            group_members=input_data['members']
-        )
-        session.add(new_group)
+        session.bulk_insert_mappings(self.group, input_data)
         try:
             session.commit()
         except Exception as err:
             logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
-    def update(self, input_data: dict[str, Any]) -> None:
+    def update_all(self, input_data: list[dict[str, Any]]) -> None:
         """
-        Функция принимает словарь с данными
-        и обновляет их
+        Функция принимает список словарей с данными групп
+        и обновляет их в бд
         """
-        group = session.query(self.group).filter(self.group.group_id == input_data['group_id']).first()
-        if not group:
-            logger.warning(f'Такой группы нет в бд: {group}')
-            raise ValueError('Такой группы нет в бд')
-        group.group_name = input_data['name']
-        group.screen_name = input_data['screen_name']
-        group.group_members = input_data['members']
+        session.bulk_update_mappings(self.group, input_data)
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении группы: {err}')
+            logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
     def get_group_id(self, screen_name: str) -> int | None:
@@ -86,46 +74,28 @@ class PostService:
     def __init__(self, post: Base) -> None:
         self.post = post
 
-    def add(self, input_data: dict[str, Any]) -> None:
+    def add_all(self, input_data: list[dict[str, Any]]) -> None:
         """
-        Функция принимает словарь с данными поста
-        и добавляет эти данные бд, если их не существует
+        Функция принимает список словарей с данными постов
+        и добавляет эти данные бд
         """
-        new_post = self.post(
-            post_id=input_data['post_id'],
-            owner_id=input_data['owner_id'],
-            group_id=input_data['group_id'],
-            quantity_comments=input_data['quantity_comments'],
-            reposts=input_data['reposts'],
-            likes=input_data['likes'],
-            views=input_data['views'],
-            photo=input_data['photo'],
-            post_text=input_data['text'],
-            date=input_data['date']
-        )
-        session.add(new_post)
+        session.bulk_insert_mappings(self.post, input_data)
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении поста: {err}')
+            logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
-    def update(self, input_data: dict[str, Any]) -> None:
+    def update_all(self, input_data: list[dict[str, Any]]) -> None:
         """
-        Функция принимает словарь с данными
-        и обновляет их
+        Функция принимает список словарей с данными постов
+        и обновляет их в бд
         """
-        post = session.query(self.post).filter(self.post.post_id == input_data['post_id']).first()
-        if not post:
-            logger.warning(f'Такого поста нет в бд: {post}')
-            raise ValueError('Такого поста нет в бд')
-        post.quantity_comments = input_data['quantity_comments']
-        post.likes = input_data['likes']
-        post.views = input_data['views']
+        session.bulk_update_mappings(self.post, input_data)
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении поста: {err}')
+            logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
     def update_tonal_comments(self, tone: str | None, where_post: int) -> None:
