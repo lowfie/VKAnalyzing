@@ -20,3 +20,22 @@
 docker run -p 6379:6379 -d redis
 docker run -p 5432:5432 -e POSTGRES_PASSWORD=123 -d postgres
 ```
+
+## Конфигурация бота (.env)
+```
+VK_TOKEN=vk_api_token
+BOT_TOKEN=telegram_api_token
+
+USER_POSTGRES=postgres
+PASSWORD_POSTGRES=123
+HOST_POSTGRES=localhost
+PORT_POSTGRES=5432
+DATABASE_POSTGRES=postgres
+
+PREFIX_REDIS=state_aiogram
+PASSWORD_REDIS=
+HOST_REDIS=localhost
+PORT_REDIS=6379
+DATABASE_REDIS=0
+```
+[Получить ссылку на VK_TOKEN здесь][https://dev.vk.com/]
