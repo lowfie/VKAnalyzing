@@ -38,5 +38,5 @@ HOST_REDIS=localhost
 PORT_REDIS=6379
 DATABASE_REDIS=0
 ```
-Инструкция для получения ссылки на VK_TOKEN [здесь](https://dvmn.org/encyclopedia/qna/63/kak-poluchit-token-polzovatelja-dlja-vkontakte/)
+Инструкция для получения ссылки на VK_TOKEN [здесь](https://dvmn.org/encyclopedia/qna/63/kak-poluchit-token-polzovatelja-dlja-vkontakte/) \n
 [Получить ссылку на VK_TOKEN здесь](https://dev.vk.com/)
