@@ -39,7 +39,6 @@ PORT_REDIS=6379
 DATABASE_REDIS=0
 ```
 
-**Инструкция для получения ссылки на VK_TOKEN [здесь](https://dvmn.org/encyclopedia/qna/63/kak-poluchit-token-polzovatelja-dlja-vkontakte/)**
-&nbsp;
+**Инструкция для получения ссылки на VK_TOKEN [здесь](https://dvmn.org/encyclopedia/qna/63/kak-poluchit-token-polzovatelja-dlja-vkontakte/)**&nbsp;
 **Получить токен на VK_TOKEN [здесь](https://dev.vk.com/)**
 
