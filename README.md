@@ -39,7 +39,7 @@ PORT_REDIS=6379
 DATABASE_REDIS=0
 ```
 
-- **Инструкция для получения *VK_TOKEN* [здесь](https://dvmn.org/encyclopedia/qna/63/kak-poluchit-token-polzovatelja-dlja-vkontakte/)**
-- **Получить токен на *VK_TOKEN* [здесь](https://dev.vk.com/)**
-- **Инструкция для получения *TELEGRAM_TOKEN* [здесь](https://web7.pro/kak-poluchit-token-bota-telegram-api/)**
+- **Инструкция для получения VK_TOKEN [*здесь*](https://dvmn.org/encyclopedia/qna/63/kak-poluchit-token-polzovatelja-dlja-vkontakte/)**
+- **Получить токен на VK_TOKEN [*здесь*](https://dev.vk.com/)**
+- **Инструкция для получения TELEGRAM_TOKEN [*здесь*](https://web7.pro/kak-poluchit-token-bota-telegram-api/)**
 
