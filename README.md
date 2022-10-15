@@ -38,4 +38,4 @@ HOST_REDIS=localhost
 PORT_REDIS=6379
 DATABASE_REDIS=0
 ```
-<code>[Получить ссылку на VK_TOKEN здесь][https://dev.vk.com/]</code>
+[Получить ссылку на VK_TOKEN здесь](https://dev.vk.com/)
