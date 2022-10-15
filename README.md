@@ -12,7 +12,7 @@
 1. Клонируйте репозиторий с GitHub `git clone https://github.com/lowfie/VkAnalyzing.git`
 2. Создайте виртуальное окружение
 3. Установите зависимости `pip install -r requirements.txt`
-4. Добавьте файл `.env` в папку директорию `data`
+4. Добавьте файл `.env` в директорию `data`
 5. Установите docker для вашей ОС
 
 Запустите локальную БД для работы FSM в aiogram и PostgreSQL для сбора данных:
