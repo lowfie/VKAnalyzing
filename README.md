@@ -17,5 +17,6 @@
 
 Запустите локальную БД для работы FSM в aiogram и PostgreSQL для сбора данных:
 ```
-docker run -d -p 6379:6379 redis
+docker run -p 6379:6379 -d redis
+docker run -p 5432:5432 -e POSTGRES_PASSWORD=123 -d postgres
 ```
