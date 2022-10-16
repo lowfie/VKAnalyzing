@@ -1,5 +1,1 @@
-from . import start
-from . import parse_group
-from . import statistics
-from . import tops
-from . import autoparse_group
+from . import start, parse_group, statistics, tops, autoparse_group

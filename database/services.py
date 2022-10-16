@@ -39,9 +39,7 @@ class GroupService:
         """
         Функция принимает название группы и отдаёт её ID
         """
-        group_id = session.query(self.group.group_id).filter(
-            self.group.screen_name == screen_name
-        ).first()
+        group_id = session.query(self.group.group_id).filter(self.group.screen_name == screen_name).first()
         group_id = group_id[0] if group_id else group_id
         return group_id
 
@@ -52,11 +50,9 @@ class GroupService:
         значение в колонке autoparse
         """
         group_id = self.get_group_id(group_name)
-        if not group_id:
-            return None
-        else:
-            autoparse_status = not session.query(self.group.autoparse).filter(
-                self.group.group_id == group_id).first()[0]
+        if group_id:
+            autoparse_status = not session.query(self.group.autoparse).filter(self.group.group_id == group_id).first()[0]
+
             column = {'autoparse': autoparse_status}
 
             session.query(self.group).filter(self.group.group_id == self.get_group_id(group_name)).update(column)
@@ -67,6 +63,7 @@ class GroupService:
                 logger.error(f'Произошла ошибка при обновлении статуса авто-парсинга: {err}')
                 session.rollback()
             return autoparse_status
+        return None
 
 
 class PostService:

@@ -44,20 +44,10 @@ class VkParser:
         """
         logger.info(f'Начался сбор групп')
 
-        params_get_group = {
-            'group_id': group,
-            'access_token': VK_TOKEN,
-            'count': 0,
-            'v': self.vk_version
-        }
+        params_get_group = {'group_id': group, 'access_token': VK_TOKEN, 'count': 0, 'v': self.vk_version}
         get_group = httpx.get(self.groups_getGroup, params=params_get_group).json()['response'][0]
 
-        params_group_members = {
-            'group_id': get_group['id'],
-            'access_token': VK_TOKEN,
-            'count': 0,
-            'v': self.vk_version
-        }
+        params_group_members = {'group_id': get_group['id'], 'access_token': VK_TOKEN, 'count': 0, 'v': self.vk_version}
         get_group_members = httpx.get(self.groups_getMembers, params=params_group_members).json()['response']
 
         group_data = {
@@ -90,12 +80,7 @@ class VkParser:
         service_post = PostService(Post)
 
         for group in self.group_metadata:
-            params = {
-                'domain': group['screen_name'],
-                'count': 60,
-                'access_token': VK_TOKEN,
-                'v': self.vk_version
-            }
+            params = {'domain': group['screen_name'], 'count': 60, 'access_token': VK_TOKEN, 'v': self.vk_version}
             response = httpx.get(self.wall_get, params=params).json()
 
             # Список из 60 последних постов
@@ -170,10 +155,5 @@ class VkParser:
         service_comment.update_all(self.comments_update_metadata)
 
     async def run_vk_parser(self, group: str) -> None:
-        tasks = [
-            self.get_group_byid(group),
-            self.get_posts(),
-            self.get_wall_comments()
-        ]
-
+        tasks = [self.get_group_byid(group), self.get_posts(), self.get_wall_comments()]
         await asyncio.gather(*tasks)

@@ -57,10 +57,6 @@ async def load_period(message: types.Message, state: FSMContext):
             parse_mode = None
 
         await dp.bot.send_message(
-            chat_id=message.chat.id,
-            text=text,
-            disable_web_page_preview=True,
-            parse_mode=parse_mode
+            chat_id=message.chat.id, text=text, disable_web_page_preview=True, parse_mode=parse_mode
         )
-
         await state.finish()

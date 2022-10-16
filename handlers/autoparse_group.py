@@ -1,5 +1,6 @@
 from aiogram import types
 from loader import dp
+from loguru import logger
 
 from database.services import GroupService
 from database.models import Group
@@ -7,6 +8,7 @@ from database.models import Group
 
 @dp.message_handler(commands='autoparse')
 async def parser_metadata_group(message: types.Message):
+    logger.info("Вызван Авто-парсинг")
     group_service = GroupService(Group)
 
     text = message.text
