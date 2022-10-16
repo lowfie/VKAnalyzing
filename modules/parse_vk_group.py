@@ -51,7 +51,6 @@ class VkParser:
             'v': self.vk_version
         }
         get_group = httpx.get(self.groups_getGroup, params=params_get_group).json()['response'][0]
-        await asyncio.sleep(5)
 
         params_group_members = {
             'group_id': get_group['id'],
@@ -60,7 +59,6 @@ class VkParser:
             'v': self.vk_version
         }
         get_group_members = httpx.get(self.groups_getMembers, params=params_group_members).json()['response']
-        await asyncio.sleep(5)
 
         group_data = {
             'group_id': get_group['id'],
