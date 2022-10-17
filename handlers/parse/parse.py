@@ -7,13 +7,16 @@ from loguru import logger
 from .parse_state import ParseFormState
 from modules.parse_vk_group import VkParser
 
+from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from keyboards.reply.menu_keyboard import main_keyboard
 from handlers.cancel_state_handler import cancel_handler
 
 
 @dp.message_handler(commands='parse', state=None)
+@dp.message_handler(regexp='^(🔨 Спарсить группу)$')
 async def cm_stats(message: types.Message):
     await ParseFormState.name.set()
-    await message.reply('Введите название группы из ссылки')
+    await message.reply('Введите название группы из ссылки', reply_markup=await cancel_state_keyboard())
 
 
 @dp.message_handler(state=ParseFormState.name, content_types=['text'])
@@ -30,5 +33,5 @@ async def load_name(message: types.Message, state: FSMContext):
     else:
         text = 'Что-то пошло не так. Попробуй ещё раз.'
 
-    await message.answer(text=text)
+    await message.answer(text=text, reply_markup=await main_keyboard())
     await state.finish()
