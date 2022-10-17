@@ -23,7 +23,6 @@ async def load_name(message: types.Message, state: FSMContext):
 
     if len(text.split()) == 1:
         group = text.split()[0]
-        print(group)
         text = f'Парсинг группы <b>{group}</b> закончился'
         logger.info(f'Начался парсинг группы {group}')
         await parser_vk.run_vk_parser(group)
