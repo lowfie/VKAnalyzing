@@ -1,6 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
-from keyboards.reply.main_keyboards import main_keyboard
+from keyboards.reply.menu_keyboard import main_keyboard
 
 from loader import dp
 from loguru import logger
