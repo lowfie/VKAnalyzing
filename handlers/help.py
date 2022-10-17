@@ -1,6 +1,6 @@
 from aiogram.dispatcher.filters.builtin import CommandHelp
 
-from keyboards.reply.main_keyboards import main_keyboard
+from keyboards.reply.menu_keyboard import main_keyboard
 
 from aiogram import types
 from loader import dp
