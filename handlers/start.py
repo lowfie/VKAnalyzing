@@ -1,12 +1,12 @@
 from aiogram import types
+from aiogram.dispatcher.filters.builtin import CommandStart
+from keyboards.reply.menu_keyboard import main_keyboard
+
 from loader import dp
 from loguru import logger
 
 
-@dp.message_handler(commands='start')
+@dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
     logger.info('Вызван Старт')
-    await dp.bot.send_message(
-        chat_id=message.chat.id,
-        text='<b>Аналитический бот готов к работе</b>'
-    )
+    await message.answer(text='<b>Аналитический бот готов к работе</b>', reply_markup=await main_keyboard())

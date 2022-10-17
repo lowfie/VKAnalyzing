@@ -9,21 +9,25 @@ from database.models import Group, Post
 
 from loguru import logger
 
+from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from keyboards.reply.menu_keyboard import main_keyboard
+
 from .statistics_state import StatisticsFormState
 from handlers.cancel_state_handler import cancel_handler
 
 
 @dp.message_handler(commands='stats', state=None)
+@dp.message_handler(regexp='^(📊 Статистика группы)$')
 async def cm_stats(message: types.Message):
     await StatisticsFormState.name.set()
-    await message.reply('Введите название группы из ссылки')
+    await message.reply('Введите название группы из ссылки', reply_markup=await cancel_state_keyboard())
 
 
 @dp.message_handler(state=StatisticsFormState.name, content_types=['text'])
 async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['name'] = message.text
-    await message.reply('Введите период подсчёта статистики (в днях)')
+    await message.reply('Введите период подсчёта статистики (в днях)', reply_markup=await cancel_state_keyboard())
     await StatisticsFormState.next()
 
 
@@ -54,11 +58,7 @@ async def load_period(message: types.Message, state: FSMContext):
                    f'Попробуйте указать период больше'
         else:
             text = f'Группы <b>{data["name"]}</b> нету в базе\n' \
-                   f'Вы можете её добавить написать <code>/parse group_name</code>'
+                   f'Вы можете её добавить написать <code>/parse</code>'
 
-        await dp.bot.send_message(
-            chat_id=message.chat.id,
-            text=text,
-        )
-
+        await message.answer(text=text, reply_markup=await main_keyboard())
         await state.finish()

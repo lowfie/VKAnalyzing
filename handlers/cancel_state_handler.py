@@ -1,6 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+from keyboards.reply.menu_keyboard import main_keyboard
 
 from loader import dp
 
@@ -16,4 +17,4 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
     logger.info(f'Отмена состояния: {current_state}')
     await state.finish()
-    await message.reply('Действие было отменено')
+    await message.reply('Вы перешли в главное меню', reply_markup=await main_keyboard())

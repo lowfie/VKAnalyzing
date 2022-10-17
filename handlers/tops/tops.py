@@ -10,21 +10,25 @@ from database.models import Group, Post
 
 from loguru import logger
 
+from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from keyboards.reply.menu_keyboard import main_keyboard
+
 from .tops_state import TopsFormState
 from handlers.cancel_state_handler import cancel_handler
 
 
 @dp.message_handler(commands='tops', state=None)
+@dp.message_handler(regexp='^(📈 Топы постов группы)$')
 async def cm_tops(message: types.Message):
     await TopsFormState.name.set()
-    await message.reply('Введите название группы из ссылки')
+    await message.reply('Введите название группы из ссылки', reply_markup=await cancel_state_keyboard())
 
 
 @dp.message_handler(state=TopsFormState.name, content_types=['text'])
 async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['name'] = message.text
-    await message.reply('Введите период подсчёта топов (в днях)')
+    await message.reply('Введите период подсчёта топов (в днях)', reply_markup=await cancel_state_keyboard())
     await TopsFormState.next()
 
 
@@ -53,10 +57,10 @@ async def load_period(message: types.Message, state: FSMContext):
         else:
             text = f'Не удалось собрать статистику группы <b>{data["name"]}</b>\n' \
                    f'Добавьте группу или укажите больший период\n' \
-                   f'Вы можете добавить группу написав <code>/parse group_name</code>'
+                   f'Вы можете добавить группу написав <code>/parse</code>'
             parse_mode = None
 
-        await dp.bot.send_message(
-            chat_id=message.chat.id, text=text, disable_web_page_preview=True, parse_mode=parse_mode
+        await message.answer(
+            text=text, disable_web_page_preview=True, parse_mode=parse_mode, reply_markup=await main_keyboard()
         )
         await state.finish()
