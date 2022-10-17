@@ -28,6 +28,7 @@ async def load_name(message: types.Message, state: FSMContext):
         group = text.split()[0]
         text = f'Парсинг группы <b>{group}</b> закончился'
         logger.info(f'Начался парсинг группы {group}')
+        await message.answer('Начался сбор данных, пожалуйста ожидайте...')
         await parser_vk.run_vk_parser(group)
         logger.info(f'Парсинг группы {group} закончен')
     else:

@@ -18,7 +18,7 @@ from handlers.cancel_state_handler import cancel_handler
 
 
 @dp.message_handler(commands='tops', state=None)
-@dp.message_handler(regexp='^(📈 Топы постов группы)$')
+@dp.message_handler(regexp='^(📈 Анализ постов)$')
 async def cm_tops(message: types.Message):
     await TopsFormState.name.set()
     await message.reply('Введите название группы из ссылки', reply_markup=await cancel_state_keyboard())

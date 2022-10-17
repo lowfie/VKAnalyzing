@@ -17,7 +17,7 @@ from handlers.cancel_state_handler import cancel_handler
 
 
 @dp.message_handler(commands='stats', state=None)
-@dp.message_handler(regexp='^(📊 Статистика группы)$')
+@dp.message_handler(regexp='^(📊 Статистика)$')
 async def cm_stats(message: types.Message):
     await StatisticsFormState.name.set()
     await message.reply('Введите название группы из ссылки', reply_markup=await cancel_state_keyboard())

@@ -95,20 +95,17 @@ class PostService:
             logger.error(f'Произошла ошибка при сохранении группы: {err}')
             session.rollback()
 
-    def update_tonal_comments(self, tone: str | None, where_post: int) -> None:
+    def update_tonal_comments(self, tones_post: dict[str, int]) -> None:
         """
         Функция принимает тон комментария и ID поста
         и обновляет эти параметры в бд
         """
-        if tone == 'positive':
-            column = {'positive_comments': (self.post.positive_comments + 1)}
-        elif tone == 'negative':
-            column = {'negative_comments': (self.post.negative_comments + 1)}
-        else:
-            column = {'negative_comments': self.post.negative_comments}
+        positive_comment = {'positive_comments': (self.post.positive_comments + tones_post['positive_comments'])}
+        negative_comment = {'negative_comments': (self.post.negative_comments + tones_post['negative_comments'])}
+        tones = [positive_comment, negative_comment]
 
-        session.query(self.post).filter(self.post.post_id == where_post).update(column)
-
+        for tone in tones:
+            session.query(self.post).filter(self.post.post_id == tones_post['post_id']).update(tone)
         try:
             session.commit()
         except Exception as err:

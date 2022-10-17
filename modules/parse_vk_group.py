@@ -84,19 +84,19 @@ class VkParser:
             response = httpx.get(self.wall_get, params=params).json()
 
             # Список из 60 последних постов
-            for item in response['response']['items']:
+            for post in response['response']['items']:
                 # Добавление данных в таблицу posts
                 post_data = {
-                    'post_id': item['id'],
-                    'owner_id': item['owner_id'],
+                    'post_id': post['id'],
+                    'owner_id': post['owner_id'],
                     'group_id': group['group_id'],
-                    'likes': item['likes']['count'],
-                    'quantity_comments': item['comments']['count'],
-                    'reposts': item['reposts']['count'],
-                    'views': item['views']['count'],
-                    'photo': True if 'attachments' in item else False,
-                    'post_text': item['text'],
-                    'date': datetime.fromtimestamp(item['date'])
+                    'likes': post['likes']['count'],
+                    'quantity_comments': post['comments']['count'],
+                    'reposts': post['reposts']['count'],
+                    'views': post['views']['count'],
+                    'photo': True if 'attachments' in post else False,
+                    'post_text': post['text'],
+                    'date': datetime.fromtimestamp(post['date'])
                 }
                 if session.query(Post).filter(Post.post_id == post_data['post_id']).first() is None:
                     self.posts_metadata.append(post_data)
@@ -119,7 +119,8 @@ class VkParser:
         service_post = PostService(Post)
 
         # Перебор всех постов для получения комментариев
-        for num, post in enumerate(self.posts_metadata, start=1):
+        all_posts = self.posts_metadata + self.posts_update_metadata
+        for num, post in enumerate(all_posts, start=1):
             params = {
                 'owner_id': post['owner_id'],
                 'post_id': post['post_id'],
@@ -134,22 +135,32 @@ class VkParser:
             if num % 4 == 0:
                 await asyncio.sleep(2)
 
+            # Список количества позитивных/негативных комментариев у поста
+            tones_post = {'post_id': post['post_id'], 'positive_comments': 0, 'negative_comments': 0}
+
             # Итерация всех комментариев поста
-            for item in response['response']['items']:
-                if len(item['text'].split()) > 1:
+            for comment in response['response']['items']:
+                if len(comment['text'].split()) > 1:
                     # Добавление данных в бд
-                    tone = self.sentiment_model.set_tone_comment([item['text']])
+                    tone = self.sentiment_model.set_tone_comment([comment['text']])
                     comment_data = {
-                        'comment_id': item['id'],
+                        'comment_id': comment['id'],
                         'post_id': post['post_id'],
-                        'text': item['text'],
+                        'text': comment['text'],
                         'tone': tone
                     }
                     if session.query(Comment).filter(Comment.comment_id == comment_data['comment_id']).first() is None:
                         self.comments_metadata.append(comment_data)
-                        service_post.update_tonal_comments(tone, post['post_id'])
+                        # подсчёт позитивных/негативных комментариев поста
+                        if tone == 'positive':
+                            tones_post['positive_comments'] += 1
+                        elif tone == 'negative':
+                            tones_post['negative_comments'] += 1
                     else:
                         self.comments_update_metadata.append(comment_data)
+
+            # Обновление количества позитивных/негативных комментариев поста
+            service_post.update_tonal_comments(tones_post)
 
         service_comment.add_all(self.comments_metadata)
         service_comment.update_all(self.comments_update_metadata)
