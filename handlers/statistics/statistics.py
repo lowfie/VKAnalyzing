@@ -56,9 +56,5 @@ async def load_period(message: types.Message, state: FSMContext):
             text = f'Группы <b>{data["name"]}</b> нету в базе\n' \
                    f'Вы можете её добавить написать <code>/parse group_name</code>'
 
-        await dp.bot.send_message(
-            chat_id=message.chat.id,
-            text=text,
-        )
-
+        await message.answer(text=text)
         await state.finish()

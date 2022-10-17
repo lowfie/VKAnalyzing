@@ -24,7 +24,4 @@ async def parser_metadata_group(message: types.Message):
     else:
         text = 'Что-то пошло не так. Попробуй ещё раз'
 
-    await dp.bot.send_message(
-        chat_id=message.chat.id,
-        text=text
-    )
+    await message.answer(text=text)

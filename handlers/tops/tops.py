@@ -56,7 +56,5 @@ async def load_period(message: types.Message, state: FSMContext):
                    f'Вы можете добавить группу написав <code>/parse group_name</code>'
             parse_mode = None
 
-        await dp.bot.send_message(
-            chat_id=message.chat.id, text=text, disable_web_page_preview=True, parse_mode=parse_mode
-        )
+        await message.answer(text=text, disable_web_page_preview=True, parse_mode=parse_mode)
         await state.finish()
