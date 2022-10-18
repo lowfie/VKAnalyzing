@@ -21,7 +21,7 @@ from handlers.cancel_state_handler import cancel_handler
 async def cm_stats(message: types.Message):
     await StatisticsFormState.name.set()
     await message.reply(
-        "Введите название группы из ссылки", reply_markup=await cancel_state_keyboard()
+        "⌨ Введите название группы из ссылки", reply_markup=await cancel_state_keyboard()
     )
 
 
@@ -30,7 +30,7 @@ async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = message.text
     await message.reply(
-        "Введите период подсчёта статистики (в днях)",
+        "⌨ Введите период подсчёта статистики <b>(в днях)</b>",
         reply_markup=await cancel_state_keyboard(),
     )
     await StatisticsFormState.next()
@@ -45,7 +45,7 @@ async def load_period(message: types.Message, state: FSMContext):
         except (OverflowError, ValueError) as err:
             logger.warning(f"В команде /stats указан неверный параметр периода: {err}")
             await message.reply(
-                "Вы ввели некорректное значение, поэтому будет использоваться неделя, как период"
+                "❗ Вы ввели некорректное значение, поэтому будет использоваться неделя, как период"
             )
             days = timedelta(days=7)
 
@@ -55,7 +55,8 @@ async def load_period(message: types.Message, state: FSMContext):
 
         if statistics is not None and statistics["count_post"] > 0:
             text = (
-                f'Собрано <b>{statistics["count_post"]}</b> постов за период\n'
+                f'<b>- Статистика за период</b>\n\n'
+                f'Собрано <b>{statistics["count_post"]}</b> постов\n'
                 f'Посты с фото/видео: <b>{statistics["posts_with_photo"]}</b>\n'
                 f'Лайки: <b>{statistics["likes"]}</b>\n'
                 f'Комментарии: <b>{statistics["comments"]}</b>\n'
@@ -64,12 +65,12 @@ async def load_period(message: types.Message, state: FSMContext):
             )
         elif statistics is not None and statistics["count_post"] == 0:
             text = (
-                f"Статистику за этот период невозможно собрать\n"
+                f"❗ Статистику за этот период невозможно собрать\n\n"
                 f"Попробуйте указать период больше"
             )
         else:
             text = (
-                f'Группы <b>{data["name"]}</b> нету в базе\n'
+                f'❌ Группы <b>{data["name"]}</b> нету в базе\n'
                 f"Вы можете её добавить написать <code>/parse</code>"
             )
 

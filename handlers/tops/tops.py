@@ -22,7 +22,7 @@ from handlers.cancel_state_handler import cancel_handler
 async def cm_tops(message: types.Message):
     await TopsFormState.name.set()
     await message.reply(
-        "Введите название группы из ссылки", reply_markup=await cancel_state_keyboard()
+        "⌨ Введите название группы из ссылки", reply_markup=await cancel_state_keyboard()
     )
 
 
@@ -31,7 +31,7 @@ async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = message.text
     await message.reply(
-        "Введите период подсчёта топов (в днях)",
+        "⌨ Введите период подсчёта топов (в днях)",
         reply_markup=await cancel_state_keyboard(),
     )
     await TopsFormState.next()
@@ -46,7 +46,7 @@ async def load_period(message: types.Message, state: FSMContext):
         except (OverflowError, ValueError) as err:
             logger.warning(f"В команде /tops указан неверный параметр периода: {err}")
             await message.reply(
-                "Вы ввели некорректное значение, поэтому будет использоваться неделя, как период"
+                "❌ Вы ввели некорректное значение, поэтому будет использоваться неделя, как период"
             )
             days = timedelta(days=7)
 
@@ -65,7 +65,7 @@ async def load_period(message: types.Message, state: FSMContext):
             parse_mode = "html"
         else:
             text = (
-                f'Не удалось собрать статистику группы <b>{data["name"]}</b>\n'
+                f'❌ Не удалось собрать статистику группы <b>{data["name"]}</b>\n\n'
                 f"Добавьте группу или укажите больший период\n"
                 f"Вы можете добавить группу написав <code>/parse</code>"
             )

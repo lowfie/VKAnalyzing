@@ -17,7 +17,7 @@ from handlers.cancel_state_handler import cancel_handler
 async def cm_stats(message: types.Message):
     await ParseFormState.name.set()
     await message.reply(
-        "Введите название группы из ссылки\nЭто может занять какое-то время, ожидайте...",
+        "⌨ Введите название группы из ссылки\n\n❗ Это может занять какое-то время, ожидайте...",
         reply_markup=await cancel_state_keyboard()
     )
 
@@ -36,10 +36,10 @@ async def load_name(message: types.Message, state: FSMContext):
         if is_parsing:
             logger.info(f"Начался парсинг группы {group}")
             await message.answer(
-                text='Успешно', reply_markup=await main_keyboard()
+                text='❕ Данные были успешно собраны', reply_markup=await main_keyboard()
             )
         else:
             await message.answer(
-                text=f'Невозможно собрать данные группы <b>{group}</b>', reply_markup=await main_keyboard()
+                text=f'❌ Невозможно собрать данные группы <b>{group}</b>', reply_markup=await main_keyboard()
             )
     await state.finish()
