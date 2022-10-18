@@ -23,8 +23,8 @@ async def autoparse_vk():
 
     for screen_name in groups_autoparse:
         logger.info(f"Автопарсинг группы {screen_name[0]} начался")
-        await asyncio.sleep(1)
         await vk_parser.run_vk_parser(screen_name[0])
+        await asyncio.sleep(5)
         logger.info(f"Автопарсинг группы {screen_name[0]} закончен")
 
 
