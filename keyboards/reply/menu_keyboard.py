@@ -1,7 +1,7 @@
 from aiogram import types
 
 
-async def main_keyboard():
+async def main_keyboard() -> types.ReplyKeyboardMarkup:
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(
         types.KeyboardButton("🔨 Спарсить группу"),
