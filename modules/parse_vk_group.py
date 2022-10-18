@@ -28,6 +28,7 @@ class VkParser:
 
         # Объекты для базы данных
         self.group_metadata: list[dict[str, Any]] = []
+        self.group_update_metadata: list[dict[str, Any]] = []
         self.posts_metadata: list[dict[str, Any]] = []
         self.posts_update_metadata: list[dict[str, Any]] = []
         self.comments_metadata: list[dict[str, Any]] = []
@@ -36,7 +37,7 @@ class VkParser:
         # Инициализация модели нейросети для анализа тональности текста
         self.sentiment_model = SentimentalAnalysisModel()
 
-    async def get_group_byid(self, group: str) -> None:
+    async def get_group_byid(self, group: str) -> bool:
         """
         Функция принимает на вход имя в ссылке группы и собирает данные
         Далее она сохраняет в бд и передаёт параметры для сбора постов
@@ -50,9 +51,11 @@ class VkParser:
             "count": 0,
             "v": self.vk_version,
         }
-        get_group = httpx.get(self.groups_getGroup, params=params_get_group).json()[
-            "response"
-        ][0]
+        try:
+            get_group = httpx.get(self.groups_getGroup, params=params_get_group).json()["response"][0]
+        except KeyError:
+            logger.warning('Ошибка парсинга группы (Ошибка get-запроса: невозможно собрать данные)')
+            return False
 
         params_group_members = {
             "group_id": get_group["id"],
@@ -74,19 +77,16 @@ class VkParser:
         # Инициализация класса для сохранения в бд
         service_group = GroupService(Group)
 
-        # Формирование списка с данным для сбора постов
-        self.group_metadata.append(group_data)
-
         # Сохранение и обновление данных групп в бд
-        if (
-            session.query(Group)
-            .filter(Group.group_id == group_data["group_id"])
-            .first()
-            is None
-        ):
+        if session.query(Group).filter(Group.group_id == group_data["group_id"]).first() is None:
+            # Формирование списка с данным для сбора постов
+            self.group_metadata.append(group_data)
             service_group.add_all(self.group_metadata)
         else:
+            # Формирование списка с данным для обновления постов
+            self.group_update_metadata.append(group_data)
             service_group.update_all(self.group_metadata)
+        return True
 
     async def get_posts(self) -> None:
         """
@@ -97,8 +97,8 @@ class VkParser:
 
         # Инициализация класса для сохранения в бд
         service_post = PostService(Post)
-
-        for group in self.group_metadata:
+        all_groups = self.group_metadata + self.group_update_metadata
+        for group in all_groups:
             params = {
                 "domain": group["screen_name"],
                 "count": 60,
@@ -203,6 +203,10 @@ class VkParser:
         service_comment.add_all(self.comments_metadata)
         service_comment.update_all(self.comments_update_metadata)
 
-    async def run_vk_parser(self, group: str) -> None:
+    async def run_vk_parser(self, group: str) -> None | bool:
         tasks = [self.get_group_byid(group), self.get_posts(), self.get_wall_comments()]
-        await asyncio.gather(*tasks)
+        result_tasks = await asyncio.gather(*tasks)
+        if False in result_tasks:
+            return False
+        else:
+            return True
