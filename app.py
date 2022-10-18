@@ -11,21 +11,14 @@ from modules.tasks import schedule
 
 import handlers
 
-logger.add(
-    'logs/{time:YYYY-MM-DD} logs.log',
-    format='{time} : {level} : {message}',
-    level='INFO',
-    rotation='1 day'
-)
-
 
 async def on_startup(dispatcher):
     asyncio.create_task(schedule())
     try:
-        logger.info('the bot has been successfully start')
+        logger.info("the bot has been successfully start")
         create_tables()
     except Exception as err:
-        logger.error(f'Ошибка инициализации БД: {err}')
+        logger.error(f"Ошибка инициализации БД: {err}")
 
 
 async def on_shutdown(dispatcher):
@@ -33,5 +26,7 @@ async def on_shutdown(dispatcher):
     await dispatcher.storage.wait_closed()
 
 
-if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
+if __name__ == "__main__":
+    executor.start_polling(
+        dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown
+    )

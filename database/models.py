@@ -5,41 +5,41 @@ from loader import Base, engine
 
 
 class Group(Base):
-    __tablename__ = 'groups'
+    __tablename__ = "groups"
 
-    group_id = Column('group_id', Integer, primary_key=True)
-    group_name = Column('group_name', Text)
-    screen_name = Column('screen_name', Text)
-    group_members = Column('members', Integer, default=0)
-    autoparse = Column('is_autoparse', Boolean, default=False)
-    post = relationship('Post', lazy='select')
+    group_id = Column("group_id", Integer, primary_key=True)
+    group_name = Column("group_name", Text)
+    screen_name = Column("screen_name", Text)
+    group_members = Column("members", Integer, default=0)
+    autoparse = Column("is_autoparse", Boolean, default=False)
+    post = relationship("Post", lazy="select")
 
 
 class Post(Base):
-    __tablename__ = 'posts'
+    __tablename__ = "posts"
 
-    post_id = Column('post_id', Integer, primary_key=True)
-    owner_id = Column('owner_id', Integer)
+    post_id = Column("post_id", Integer, primary_key=True)
+    owner_id = Column("owner_id", Integer)
     group_id = Column(Integer, ForeignKey(Group.group_id), nullable=False)
-    likes = Column('likes', Integer, default=0)
-    quantity_comments = Column('quantity_comments', Integer, default=0)
-    reposts = Column('reposts', Integer, default=0)
-    views = Column('views', BigInteger, default=0)
-    photo = Column('is_photo', Boolean)
-    post_text = Column('text', Text)
-    positive_comments = Column('positive_comments', Integer, default=0)
-    negative_comments = Column('negative_comments', Integer, default=0)
-    date = Column('date', DateTime)
-    comment = relationship('Comment', lazy='select')
+    likes = Column("likes", Integer, default=0)
+    quantity_comments = Column("quantity_comments", Integer, default=0)
+    reposts = Column("reposts", Integer, default=0)
+    views = Column("views", BigInteger, default=0)
+    photo = Column("is_photo", Boolean)
+    post_text = Column("text", Text)
+    positive_comments = Column("positive_comments", Integer, default=0)
+    negative_comments = Column("negative_comments", Integer, default=0)
+    date = Column("date", DateTime)
+    comment = relationship("Comment", lazy="select")
 
 
 class Comment(Base):
-    __tablename__ = 'comments'
+    __tablename__ = "comments"
 
-    comment_id = Column('comment_id', Integer, primary_key=True)
+    comment_id = Column("comment_id", Integer, primary_key=True)
     post_id = Column(Integer, ForeignKey(Post.post_id), nullable=False)
-    text = Column('text', Text)
-    tone = Column('tone', Text)
+    text = Column("text", Text)
+    tone = Column("tone", Text)
 
 
 def create_tables() -> None:
