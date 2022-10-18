@@ -3,7 +3,6 @@ from dostoevsky.models import FastTextSocialNetworkModel
 
 
 class SentimentalAnalysisModel:
-
     def __init__(self) -> None:
         self.tokenizer = RegexTokenizer()
         self.model = FastTextSocialNetworkModel(tokenizer=self.tokenizer)
@@ -12,11 +11,11 @@ class SentimentalAnalysisModel:
         results = self.model.predict(comment, k=2)[0]
 
         for key, value in results.items():
-            if key == 'speech':
-                return 'neutral'
-            elif key == 'skip':
+            if key == "speech":
+                return "neutral"
+            elif key == "skip":
                 tones = [tone_comment for tone_comment in results.keys()]
-                tones.remove('skip')
+                tones.remove("skip")
                 return tones[0]
             elif value == max(results.values()):
                 return key

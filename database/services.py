@@ -7,7 +7,6 @@ from loader import Base
 
 
 class GroupService:
-
     def __init__(self, group: Base) -> None:
         self.group = group
 
@@ -20,7 +19,7 @@ class GroupService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении группы: {err}')
+            logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
     def update_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -32,14 +31,18 @@ class GroupService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении группы: {err}')
+            logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
     def get_group_id(self, screen_name: str) -> int | None:
         """
         Функция принимает название группы и отдаёт её ID
         """
-        group_id = session.query(self.group.group_id).filter(self.group.screen_name == screen_name).first()
+        group_id = (
+            session.query(self.group.group_id)
+            .filter(self.group.screen_name == screen_name)
+            .first()
+        )
         group_id = group_id[0] if group_id else group_id
         return group_id
 
@@ -51,23 +54,30 @@ class GroupService:
         """
         group_id = self.get_group_id(group_name)
         if group_id:
-            autoparse_status = not session.query(self.group.autoparse).filter(self.group.group_id == group_id).first()[0]
+            autoparse_status = (
+                not session.query(self.group.autoparse)
+                .filter(self.group.group_id == group_id)
+                .first()[0]
+            )
 
-            column = {'autoparse': autoparse_status}
+            column = {"autoparse": autoparse_status}
 
-            session.query(self.group).filter(self.group.group_id == self.get_group_id(group_name)).update(column)
+            session.query(self.group).filter(
+                self.group.group_id == self.get_group_id(group_name)
+            ).update(column)
 
             try:
                 session.commit()
             except Exception as err:
-                logger.error(f'Произошла ошибка при обновлении статуса авто-парсинга: {err}')
+                logger.error(
+                    f"Произошла ошибка при обновлении статуса авто-парсинга: {err}"
+                )
                 session.rollback()
             return autoparse_status
         return None
 
 
 class PostService:
-
     def __init__(self, post: Base) -> None:
         self.post = post
 
@@ -80,7 +90,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении группы: {err}')
+            logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
     def update_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -92,7 +102,7 @@ class PostService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении группы: {err}')
+            logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
     def update_tonal_comments(self, tones_post: dict[str, int]) -> None:
@@ -100,21 +110,30 @@ class PostService:
         Функция принимает тон комментария и ID поста
         и обновляет эти параметры в бд
         """
-        positive_comment = {'positive_comments': (self.post.positive_comments + tones_post['positive_comments'])}
-        negative_comment = {'negative_comments': (self.post.negative_comments + tones_post['negative_comments'])}
+        positive_comment = {
+            "positive_comments": (
+                self.post.positive_comments + tones_post["positive_comments"]
+            )
+        }
+        negative_comment = {
+            "negative_comments": (
+                self.post.negative_comments + tones_post["negative_comments"]
+            )
+        }
         tones = [positive_comment, negative_comment]
 
         for tone in tones:
-            session.query(self.post).filter(self.post.post_id == tones_post['post_id']).update(tone)
+            session.query(self.post).filter(
+                self.post.post_id == tones_post["post_id"]
+            ).update(tone)
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при обновлении тональности: {err}')
+            logger.error(f"Произошла ошибка при обновлении тональности: {err}")
             session.rollback()
 
 
 class CommentService:
-
     def __init__(self, comment: Base) -> None:
         self.comment = comment
 
@@ -127,7 +146,7 @@ class CommentService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении группы: {err}')
+            logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
     def update_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -139,5 +158,5 @@ class CommentService:
         try:
             session.commit()
         except Exception as err:
-            logger.error(f'Произошла ошибка при сохранении группы: {err}')
+            logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
