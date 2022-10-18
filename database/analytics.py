@@ -47,9 +47,7 @@ class Analytics:
                 .first()[0]
             )
 
-            def get_sum_record(
-                data: dict[str, str], query_param: InstrumentedAttribute
-            ) -> int:
+            def get_sum_record(data: dict[str, str], query_param: InstrumentedAttribute) -> int:
                 parameter = (
                     session.query(func.sum(query_param))
                     .filter(
@@ -71,9 +69,7 @@ class Analytics:
             return statistic
         return None
 
-    def get_top_stats(
-        self, input_data: dict[str, str], query_param: InstrumentedAttribute
-    ) -> str | None:
+    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> str | None:
         """
         Функция принимает словарь со значением и параметром.
         Ведёт подсчёт максимального параметра и на основе этого
