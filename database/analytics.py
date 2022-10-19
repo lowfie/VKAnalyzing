@@ -1,9 +1,10 @@
-from sqlalchemy import func
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from loader import session, Base
+from sqlalchemy import func
 
 from database.services import GroupService
 
+from datetime import datetime
 from typing import Any
 
 
@@ -17,6 +18,17 @@ class Analytics:
         self.group = group
         self.post = post
 
+    def get_to_date(self, data: dict[str, str], group_id: int) -> datetime:
+        to_date = (
+            session.query(self.post.date)
+            .filter(
+                self.post.group_id == group_id,
+                self.post.date >= data["date"],
+            )
+            .first()[0]
+        )
+        return to_date
+
     def get_statistic(self, input_data: dict[str, str]) -> dict[str, Any] | None:
         """
         Функция принимает словарь со значениями
@@ -28,7 +40,7 @@ class Analytics:
 
         if group_id:
             # Количество постов за период
-            posts = (
+            count_post = (
                 session.query(func.count(self.post.post_id))
                 .filter(
                     self.post.group_id == group_id, self.post.date >= input_data["date"]
@@ -37,7 +49,7 @@ class Analytics:
             )
 
             # Количество постов с фото/видео за период
-            post_with_photo = (
+            count_post_with_photo = (
                 session.query(func.count(self.post.post_id))
                 .filter(
                     self.post.group_id == group_id,
@@ -56,20 +68,21 @@ class Analytics:
                     )
                     .first()[0]
                 )
-                return int(parameter)
+                return parameter
 
             statistic = {
-                "count_post": posts,
-                "posts_with_photo": post_with_photo,
+                "count_post": count_post,
+                "posts_with_photo": count_post_with_photo,
                 "likes": get_sum_record(input_data, self.post.likes),
                 "views": get_sum_record(input_data, self.post.views),
                 "comments": get_sum_record(input_data, self.post.quantity_comments),
                 "reposts": get_sum_record(input_data, self.post.reposts),
+                "to_date": self.get_to_date(input_data, group_id)
             }
             return statistic
         return None
 
-    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> str | None:
+    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> dict[str, Any] | None:
         """
         Функция принимает словарь со значением и параметром.
         Ведёт подсчёт максимального параметра и на основе этого
@@ -103,5 +116,9 @@ class Analytics:
                     )
                     .first()[0]
                 )
-                return f'https://vk.com/{input_data["name"]}?w=wall{owner_id}_{post_id}'
+                top_stat_url = {
+                    "url": f"https://vk.com/{input_data['name']}?w=wall{owner_id}_{post_id}",
+                    "to_date": self.get_to_date(input_data, group_id)
+                }
+                return top_stat_url
         return None

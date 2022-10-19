@@ -21,7 +21,8 @@ from handlers.cancel_state_handler import cancel_handler
 async def cm_stats(message: types.Message):
     await StatisticsFormState.name.set()
     await message.reply(
-        "⌨ Введите название группы из ссылки", reply_markup=await cancel_state_keyboard()
+        "⌨ Введите название группы из ссылки",
+        reply_markup=await cancel_state_keyboard(),
     )
 
 
@@ -41,13 +42,13 @@ async def load_period(message: types.Message, state: FSMContext):
     analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
         try:
-            days = timedelta(days=int(message.text))
+            days = timedelta(days=abs(int(message.text)))
         except (OverflowError, ValueError) as err:
             logger.warning(f"В команде /stats указан неверный параметр периода: {err}")
             await message.reply(
-                "❗ Вы ввели некорректное значение, поэтому будет использоваться неделя, как период"
+                "❗ Вы ввели некорректное значение, поэтому будет использоваться день, как период"
             )
-            days = timedelta(days=7)
+            days = timedelta(days=1)
 
         data["date"] = str(datetime.now() - days)[:-7]
 
@@ -55,17 +56,18 @@ async def load_period(message: types.Message, state: FSMContext):
 
         if statistics is not None and statistics["count_post"] > 0:
             text = (
-                f'<b>- Статистика за период</b>\n\n'
-                f'Собрано <b>{statistics["count_post"]}</b> постов\n'
+                f"<b>— Статистика</b>\n\n"
+                f'Собрано <b>{statistics["count_post"]}</b> поста\n'
                 f'Посты с фото/видео: <b>{statistics["posts_with_photo"]}</b>\n'
                 f'Лайки: <b>{statistics["likes"]}</b>\n'
                 f'Комментарии: <b>{statistics["comments"]}</b>\n'
                 f'Репосты: <b>{statistics["reposts"]}</b>\n'
-                f'Всего просмотров: <b>{statistics["views"]}</b>'
+                f'Всего просмотров: <b>{statistics["views"]}</b>\n\n'
+                f'Период: <b>{str(datetime.now())[:-7]} — {statistics["to_date"]}</b>'
             )
         elif statistics is not None and statistics["count_post"] == 0:
             text = (
-                f"❗ Статистику за этот период невозможно собрать\n\n"
+                f"❗ Невозможно собрать статистику за этот период\n\n"
                 f"Попробуйте указать период больше"
             )
         else:

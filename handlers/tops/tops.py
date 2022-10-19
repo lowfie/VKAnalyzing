@@ -22,7 +22,8 @@ from handlers.cancel_state_handler import cancel_handler
 async def cm_tops(message: types.Message):
     await TopsFormState.name.set()
     await message.reply(
-        "⌨ Введите название группы из ссылки", reply_markup=await cancel_state_keyboard()
+        "⌨ Введите название группы из ссылки",
+        reply_markup=await cancel_state_keyboard(),
     )
 
 
@@ -42,13 +43,13 @@ async def load_period(message: types.Message, state: FSMContext):
     analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
         try:
-            days = timedelta(days=int(message.text))
+            days = timedelta(days=abs(int(message.text)))
         except (OverflowError, ValueError) as err:
             logger.warning(f"В команде /tops указан неверный параметр периода: {err}")
             await message.reply(
-                "❌ Вы ввели некорректное значение, поэтому будет использоваться неделя, как период"
+                "❌ Вы ввели некорректное значение, поэтому будет использоваться день, как период"
             )
-            days = timedelta(days=7)
+            days = timedelta(days=1)
 
         data["date"] = str(datetime.now() - days)[:-7]
 
@@ -58,9 +59,11 @@ async def load_period(message: types.Message, state: FSMContext):
 
         if (most_popular_post and most_negative_post and most_popular_post) is not None:
             text = (
-                f'{hlink("Самый популярный пост", most_popular_post)}\n'
-                f'{hlink("Самый позитивный пост", most_positive_post)}\n'
-                f'{hlink("Самый негативный пост", most_negative_post)}\n'
+                f'<b>— Топ постов</b>\n\n'
+                f'{hlink("Самый популярный пост", most_popular_post["url"])}\n'
+                f'{hlink("Самый позитивный пост", most_positive_post["url"])}\n'
+                f'{hlink("Самый негативный пост", most_negative_post["url"])}\n\n'
+                f'Период: <b>{str(datetime.now())[:-7]} — {most_negative_post["to_date"]}</b>'
             )
             parse_mode = "html"
         else:
