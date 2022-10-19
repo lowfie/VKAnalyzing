@@ -10,7 +10,7 @@ from loader import dp
 @dp.message_handler(regexp="^(❓ Помощь)$")
 async def cmd_help(message: types.Message):
     text = (
-        "<b>- Что может этот бот?</b>\n\n"
+        "<b>— Что может этот бот?</b>\n\n"
         "<code>/parse</code> - собрать данные группы\n"
         "<code>/stats</code> - посмотреть статистику группы за период\n"
         "<code>/tops</code> - посмотреть топы по постам группы за период\n"

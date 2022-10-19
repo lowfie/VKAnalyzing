@@ -78,7 +78,12 @@ class VkParser:
         service_group = GroupService(Group)
 
         # Сохранение и обновление данных групп в бд
-        if session.query(Group).filter(Group.group_id == group_data["group_id"]).first() is None:
+        if (
+            session.query(Group)
+            .filter(Group.group_id == group_data["group_id"])
+            .first()
+            is None
+        ):
             # Формирование списка с данным для сбора постов
             self.group_metadata.append(group_data)
             service_group.add_all(self.group_metadata)

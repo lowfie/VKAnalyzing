@@ -19,7 +19,8 @@ from handlers.cancel_state_handler import cancel_handler
 async def cm_stats(message: types.Message):
     await AutoparseFormState.name.set()
     await message.reply(
-        "⌨ Введите название группы из ссылки", reply_markup=await cancel_state_keyboard()
+        "⌨ Введите название группы из ссылки",
+        reply_markup=await cancel_state_keyboard(),
     )
 
 
