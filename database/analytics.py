@@ -39,6 +39,15 @@ class Analytics:
         group_id = service_group.get_group_id(input_data["name"])
 
         if group_id:
+            # Количество подписчиков группы
+            group_name, group_members = (
+                session.query(self.group.group_name, self.group.group_members)
+                .filter(
+                    self.group.group_id == group_id
+                )
+                .first()
+            )
+
             # Количество постов за период
             count_post = (
                 session.query(func.count(self.post.post_id))
@@ -71,6 +80,8 @@ class Analytics:
                 return parameter
 
             statistic = {
+                "group_name": group_name,
+                "group_members": group_members,
                 "count_post": count_post,
                 "posts_with_photo": count_post_with_photo,
                 "likes": get_sum_record(input_data, self.post.likes),
