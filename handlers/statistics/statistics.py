@@ -58,6 +58,7 @@ async def load_period(message: types.Message, state: FSMContext):
         if statistics is not None and statistics["count_post"] > 0:
             reactions = statistics["likes"] + statistics["comments"] + statistics["reposts"]
             engagement_rate = float("{0:.2f}".format((reactions / (days * statistics["group_members"])) * 100))
+            user_er = int(engagement_rate / 100 * statistics["group_members"])
             text = (
                 f'<b>— Статистика</b>\n\n'
                 f'<b>{statistics["group_name"]}: {statistics["group_members"]}</b>\n\n'
@@ -67,7 +68,7 @@ async def load_period(message: types.Message, state: FSMContext):
                 f'Комментарии: <b>{statistics["comments"]}</b>\n'
                 f'Репосты: <b>{statistics["reposts"]}</b>\n'
                 f'Всего просмотров: <b>{statistics["views"]}</b>\n\n'
-                f'Вовлеченность (охват) <b>{engagement_rate}%</b>\n\n'
+                f'Вовлеченность: <b>{user_er}</b> пользователей <b>(+{engagement_rate}%)</b>\n\n'
                 f'Период: <b>{str(datetime.now())[:-7]} — {statistics["to_date"]}</b>'
             )
         elif statistics is not None and statistics["count_post"] == 0:
