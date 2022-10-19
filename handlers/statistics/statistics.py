@@ -42,7 +42,8 @@ async def load_period(message: types.Message, state: FSMContext):
     analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
         try:
-            days = timedelta(days=abs(int(message.text)))
+            days = abs(int(message.text))
+            days_datetime = timedelta(days=days)
         except (OverflowError, ValueError) as err:
             logger.warning(f"В команде /stats указан неверный параметр периода: {err}")
             await message.reply(
@@ -50,19 +51,23 @@ async def load_period(message: types.Message, state: FSMContext):
             )
             days = timedelta(days=1)
 
-        data["date"] = str(datetime.now() - days)[:-7]
+        data["date"] = str(datetime.now() - days_datetime)[:-7]
 
         statistics = analysis.get_statistic(data)
 
         if statistics is not None and statistics["count_post"] > 0:
+            reactions = statistics["likes"] + statistics["comments"] + statistics["reposts"]
+            engagement_rate = float("{0:.2f}".format((reactions / (days * statistics["group_members"])) * 100))
             text = (
-                f"<b>— Статистика</b>\n\n"
+                f'<b>— Статистика</b>\n\n'
+                f'<b>{statistics["group_name"]}: {statistics["group_members"]}</b>\n\n'
                 f'Собрано <b>{statistics["count_post"]}</b> поста\n'
                 f'Посты с фото/видео: <b>{statistics["posts_with_photo"]}</b>\n'
                 f'Лайки: <b>{statistics["likes"]}</b>\n'
                 f'Комментарии: <b>{statistics["comments"]}</b>\n'
                 f'Репосты: <b>{statistics["reposts"]}</b>\n'
                 f'Всего просмотров: <b>{statistics["views"]}</b>\n\n'
+                f'Вовлеченность (охват) <b>{engagement_rate}%</b>\n\n'
                 f'Период: <b>{str(datetime.now())[:-7]} — {statistics["to_date"]}</b>'
             )
         elif statistics is not None and statistics["count_post"] == 0:
