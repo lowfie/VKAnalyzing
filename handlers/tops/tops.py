@@ -53,17 +53,22 @@ async def load_period(message: types.Message, state: FSMContext):
 
         data["date"] = str(datetime.now() - days)[:-7]
 
-        most_positive_post = analysis.get_top_stats(data, Post.positive_comments)
-        most_negative_post = analysis.get_top_stats(data, Post.negative_comments)
-        most_popular_post = analysis.get_top_stats(data, Post.views)
+        positive_post_list = analysis.get_top_stats(data, Post.positive_comments)
+        negative_post_list = analysis.get_top_stats(data, Post.negative_comments)
+        popular_post_list = analysis.get_top_stats(data, Post.views)
 
-        if (most_popular_post and most_negative_post and most_popular_post) is not None:
+        if (positive_post_list and negative_post_list and popular_post_list) is not None:
+            popular_urls = '\n'.join(f'{hlink(pop_post["number"], pop_post["url"])}' for pop_post in popular_post_list)
+            pos_urls = '\n'.join(f'{hlink(pos_post["number"], pos_post["url"])}' for pos_post in positive_post_list)
+            neg_urls = '\n'.join(f'{hlink(neg_post["number"], neg_post["url"])}' for neg_post in negative_post_list)
+
             text = (
                 f'<b>— Топ постов</b>\n\n'
-                f'{hlink("Самый популярный пост", most_popular_post["url"])}\n'
-                f'{hlink("Самый позитивный пост", most_positive_post["url"])}\n'
-                f'{hlink("Самый негативный пост", most_negative_post["url"])}\n\n'
-                f'Период: <b>{str(datetime.now())[:-7]} — {most_negative_post["to_date"]}</b>'
+                f'<b>Топ {len(popular_post_list)} самых популярных поста\n</b>' + popular_urls + '\n\n' +
+                f'<b>Топ {len(positive_post_list)} самых позитивных поста\n</b>' + pos_urls + '\n\n' +
+                f'<b>Топ {len(negative_post_list)} самых негативных поста\n</b>' + neg_urls + '\n\n'
+
+                f'Период: <b>{str(datetime.now())[:-7]} — {popular_post_list[0]["to_date"]}</b>'
             )
             parse_mode = "html"
         else:

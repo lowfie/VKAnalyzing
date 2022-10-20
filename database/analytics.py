@@ -93,7 +93,7 @@ class Analytics:
             return statistic
         return None
 
-    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> dict[str, Any] | None:
+    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> list[dict[str, Any]] | None:
         """
         Функция принимает словарь со значением и параметром.
         Ведёт подсчёт максимального параметра и на основе этого
@@ -101,35 +101,50 @@ class Analytics:
         """
         service_group = GroupService(self.group)
         group_id = service_group.get_group_id(input_data["name"])
+        top_stats_url_list = []
 
         if group_id:
-            max_value_record = (
-                session.query(func.max(query_param))
+            max_values_record = (
+                session.query(query_param)
+                .distinct()
                 .filter(
                     self.post.group_id == group_id, self.post.date >= input_data["date"]
                 )
-                .first()[0]
+                .order_by(query_param.desc())
+                .limit(3)
+                .all()
             )
-            if max_value_record:
+            for num, max_value_record in enumerate(max_values_record, start=1):
                 owner_id = (
                     session.query(self.post.owner_id)
                     .filter(
                         self.post.group_id == group_id,
                         self.post.date >= input_data["date"],
-                        query_param == max_value_record,
+                        query_param == max_value_record[0]
                     )
                     .first()[0]
                 )
                 post_id = (
                     session.query(self.post.post_id)
                     .filter(
-                        self.post.owner_id == owner_id, query_param == max_value_record
+                        self.post.owner_id == owner_id, query_param == max_value_record[0]
                     )
                     .first()[0]
                 )
+
+                # Название ссылки
+                if num == 1:
+                    text = "Первое место"
+                elif num == 2:
+                    text = "Второе место"
+                else:
+                    text = "Третье место"
+
                 top_stat_url = {
+                    "number": f"{text}",
                     "url": f"https://vk.com/{input_data['name']}?w=wall{owner_id}_{post_id}",
                     "to_date": self.get_to_date(input_data, group_id)
                 }
-                return top_stat_url
+                top_stats_url_list.append(top_stat_url)
+            return top_stats_url_list
         return None
