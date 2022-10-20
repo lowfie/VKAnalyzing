@@ -23,7 +23,7 @@ async def cm_tops(message: types.Message):
     await TopsFormState.name.set()
     await message.reply(
         "⌨ Введите название группы из ссылки",
-        reply_markup=await cancel_state_keyboard(),
+        reply_markup=await cancel_state_keyboard()
     )
 
 
@@ -33,7 +33,7 @@ async def load_name(message: types.Message, state: FSMContext):
         data["name"] = message.text
     await message.reply(
         "⌨ Введите период подсчёта топов (в днях)",
-        reply_markup=await cancel_state_keyboard(),
+        reply_markup=await cancel_state_keyboard()
     )
     await TopsFormState.next()
 
@@ -47,7 +47,7 @@ async def load_period(message: types.Message, state: FSMContext):
         except (OverflowError, ValueError) as err:
             logger.warning(f"В команде /tops указан неверный параметр периода: {err}")
             await message.reply(
-                "❌ Вы ввели некорректное значение, поэтому будет использоваться день, как период"
+                "❗ Вы ввели некорректное значение, поэтому будет использоваться день, как период"
             )
             days = timedelta(days=1)
 
@@ -73,8 +73,8 @@ async def load_period(message: types.Message, state: FSMContext):
             parse_mode = "html"
         else:
             text = (
-                f'❌ Не удалось собрать статистику группы <b>{data["name"]}</b>\n\n'
-                f"Добавьте группу или укажите больший период\n"
+                f'❗ Не удалось собрать статистику группы <b>{data["name"]}</b>\n\n'
+                f"Добавьте группу или укажите больший период\n\n"
                 f"Вы можете добавить группу написав <code>/parse</code>"
             )
             parse_mode = None
@@ -83,6 +83,6 @@ async def load_period(message: types.Message, state: FSMContext):
             text=text,
             disable_web_page_preview=True,
             parse_mode=parse_mode,
-            reply_markup=await main_keyboard(),
+            reply_markup=await main_keyboard()
         )
         await state.finish()

@@ -36,12 +36,12 @@ async def load_name(message: types.Message, state: FSMContext):
         autoparsing_status = group_service.set_autoparsing_group(group)
 
         if autoparsing_status is None:
-            text = "❌ Нельзя изменить статус не добавленной группы"
+            text = "❗ Нельзя изменить статус не добавленной группы"
         else:
             switch = "<b>включен</b>" if autoparsing_status else "<b>выключен</b>"
             text = f"❕ Авто-парсинг данных {switch} у группы: <b>{group}</b>"
     else:
-        text = "❌ Что-то пошло не так. Попробуй ещё раз"
+        text = "❗ Что-то пошло не так. Попробуй ещё раз"
 
     await message.answer(text=text, reply_markup=await main_keyboard())
     await state.finish()
