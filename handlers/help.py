@@ -14,6 +14,6 @@ async def cmd_help(message: types.Message):
         "<code>/parse</code> - собрать данные группы\n"
         "<code>/stats</code> - посмотреть статистику группы за период\n"
         "<code>/tops</code> - посмотреть топы по постам группы за период\n"
-        "<code>/autoparse</code> - назначить автоматический парсинг"
+        "<code>/autoparse</code> - назначить автоматический сбор данных группы"
     )
     await message.answer(text, reply_markup=await main_keyboard())
