@@ -93,7 +93,7 @@ class Analytics:
             return statistic
         return None
 
-    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> list[dict[str, Any]] | None:
+    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> list[dict[str, Any]]:
         """
         Функция принимает словарь со значением и параметром.
         Ведёт подсчёт максимального параметра и на основе этого
@@ -134,11 +134,11 @@ class Analytics:
 
                 # Название ссылки
                 if num == 1:
-                    text = "Первое место"
+                    text = "🥇 Первое место"
                 elif num == 2:
-                    text = "Второе место"
+                    text = "🥈 Второе место"
                 else:
-                    text = "Третье место"
+                    text = "🥉 Третье место"
 
                 top_stat_url = {
                     "number": f"{text}",
@@ -146,5 +146,4 @@ class Analytics:
                     "to_date": self.get_to_date(input_data, group_id)
                 }
                 top_stats_url_list.append(top_stat_url)
-            return top_stats_url_list
-        return None
+        return top_stats_url_list
