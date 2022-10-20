@@ -11,6 +11,7 @@ from loguru import logger
 
 from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
 from keyboards.reply.menu_keyboard import main_keyboard
+from keyboards.inline.choose_date_period import choice_date_period_keyboards
 
 from .statistics_state import StatisticsFormState
 from handlers.cancel_state_handler import cancel_handler
@@ -22,7 +23,7 @@ async def cm_stats(message: types.Message):
     await StatisticsFormState.name.set()
     await message.reply(
         "⌨ Введите название группы из ссылки",
-        reply_markup=await cancel_state_keyboard(),
+        reply_markup=await cancel_state_keyboard()
     )
 
 
@@ -30,10 +31,34 @@ async def cm_stats(message: types.Message):
 async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = message.text
+
     await message.reply(
-        "⌨ Введите период подсчёта статистики <b>(в днях)</b>",
-        reply_markup=await cancel_state_keyboard(),
+        "⌨ Укажите предпочтительный способ подсчёта статистики",
+        reply_markup=await choice_date_period_keyboards(),
     )
+    await StatisticsFormState.next()
+
+
+@dp.callback_query_handler(state=StatisticsFormState.choice_date_period, text_contains='choice')
+async def choice_data_period(call: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        data["choice"] = call.data
+
+        if data["choice"] == "choicePeriod":
+            await dp.bot.send_message(
+                call.from_user.id,
+                "⌨ Введите период подсчёта статистики <b>(в днях)</b>",
+                reply_markup=await cancel_state_keyboard()
+            )
+        else:
+            await dp.bot.send_message(
+                call.from_user.id,
+                "⌨ Введите дату подсчёта статистики\n\n"
+                "❗ Формат: <b>день.месяц.год</b>\n\n"
+                "Пример: <b><i>20.10.2022</i></b>",
+                reply_markup=await cancel_state_keyboard()
+            )
+
     await StatisticsFormState.next()
 
 
@@ -41,24 +66,40 @@ async def load_name(message: types.Message, state: FSMContext):
 async def load_period(message: types.Message, state: FSMContext):
     analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
+        if data["choice"] == "choicePeriod":
+            try:
+                days_datetime = timedelta(days=abs(int(message.text)))
+            except (OverflowError, ValueError) as err:
+                logger.warning(f"В команде /stats указан неверный параметр периода: {err}")
+                await message.reply(
+                    "❗ Вы ввели некорректное значение, попробуйте ещё раз",
+                    reply_markup=await main_keyboard())
+                await state.finish()
+                return
+            data["date"] = str(datetime.now() - days_datetime)[:-7]
+        else:
+            try:
+                date = datetime.strptime(message.text, "%d.%m.%Y")
+            except (OverflowError, ValueError) as err:
+                logger.warning(f"В команде /stats указан неверный параметр даты: {err}")
+                await message.reply(
+                    "❗ Вы ввели некорректное значение, попробуйте ещё раз",
+                    reply_markup=await main_keyboard())
+                await state.finish()
+                return
+            data["date"] = str(date)
+
         try:
-            days = abs(int(message.text))
-            days_datetime = timedelta(days=days)
-        except (OverflowError, ValueError) as err:
-            logger.warning(f"В команде /stats указан неверный параметр периода: {err}")
+            statistics = analysis.get_statistic(data)
+        except TypeError as err:
+            logger.warning(f"Невозможно собрать статистику за эту дату: {err}")
             await message.reply(
-                "❗ Вы ввели некорректное значение, поэтому будет использоваться день, как период"
-            )
-            days = timedelta(days=1)
-
-        data["date"] = str(datetime.now() - days_datetime)[:-7]
-
-        statistics = analysis.get_statistic(data)
+                "❗ Невозможно собрать статистику за эту дату",
+                reply_markup=await main_keyboard())
+            await state.finish()
+            return
 
         if statistics is not None and statistics["count_post"] > 0:
-            reactions = statistics["likes"] + statistics["comments"] + statistics["reposts"]
-            engagement_rate = float("{0:.2f}".format((reactions / (days * statistics["group_members"])) * 100))
-            user_er = int(engagement_rate / 100 * statistics["group_members"])
             text = (
                 f'<b>— Статистика</b>\n\n'
                 f'<b>{statistics["group_name"]}: {statistics["group_members"]}</b>\n\n'
@@ -68,8 +109,8 @@ async def load_period(message: types.Message, state: FSMContext):
                 f'Комментарии: <b>{statistics["comments"]}</b>\n'
                 f'Репосты: <b>{statistics["reposts"]}</b>\n'
                 f'Всего просмотров: <b>{statistics["views"]}</b>\n\n'
-                f'Вовлеченность: <b>{user_er}</b> пользователей <b>(+{engagement_rate}%)</b>\n\n'
-                f'Период: <b>{str(datetime.now())[:-7]} — {statistics["to_date"]}</b>'
+                f'Вовлеченность: <b>{statistics["er_users"]}</b> пользователей <b>(+{statistics["engagement_rate"]}%)</b>\n\n'
+                f'Период: <b>{statistics["from_date"]} — {statistics["to_date"]}</b>'
             )
         elif statistics is not None and statistics["count_post"] == 0:
             text = (
@@ -78,7 +119,7 @@ async def load_period(message: types.Message, state: FSMContext):
             )
         else:
             text = (
-                f'❌ Группы <b>{data["name"]}</b> нету в базе\n'
+                f'❗ Группы <b>{data["name"]}</b> нету в базе\n\n'
                 f"Вы можете её добавить написать <code>/parse</code>"
             )
 

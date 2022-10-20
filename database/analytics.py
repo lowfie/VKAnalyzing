@@ -4,7 +4,7 @@ from sqlalchemy import func
 
 from database.services import GroupService
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 
@@ -18,17 +18,6 @@ class Analytics:
         self.group = group
         self.post = post
 
-    def get_to_date(self, data: dict[str, str], group_id: int) -> datetime:
-        to_date = (
-            session.query(self.post.date)
-            .filter(
-                self.post.group_id == group_id,
-                self.post.date >= data["date"],
-            )
-            .first()[0]
-        )
-        return to_date
-
     def get_statistic(self, input_data: dict[str, str]) -> dict[str, Any] | None:
         """
         Функция принимает словарь со значениями
@@ -37,6 +26,14 @@ class Analytics:
         """
         service_group = GroupService(self.group)
         group_id = service_group.get_group_id(input_data["name"])
+        if input_data["choice"] == "choicePeriod":
+            from_date = datetime.now()
+            to_date = datetime.strptime(input_data["date"], "%Y-%m-%d %H:%M:%S")
+            days = (from_date - to_date).days
+        else:
+            from_date = datetime.strptime(input_data["date"], "%Y-%m-%d %H:%M:%S") + timedelta(hours=24)
+            to_date = datetime.strptime(input_data["date"], "%Y-%m-%d %H:%M:%S")
+            days = (from_date - to_date).days
 
         if group_id:
             # Количество подписчиков группы
@@ -52,7 +49,8 @@ class Analytics:
             count_post = (
                 session.query(func.count(self.post.post_id))
                 .filter(
-                    self.post.group_id == group_id, self.post.date >= input_data["date"]
+                    self.post.group_id == group_id,
+                    self.post.date.between(to_date, from_date)
                 )
                 .first()[0]
             )
@@ -62,33 +60,45 @@ class Analytics:
                 session.query(func.count(self.post.post_id))
                 .filter(
                     self.post.group_id == group_id,
-                    self.post.date >= input_data["date"],
+                    self.post.date.between(to_date, from_date),
                     self.post.photo == "true",
                 )
                 .first()[0]
             )
 
-            def get_sum_record(data: dict[str, str], query_param: InstrumentedAttribute) -> int:
+            def get_sum_record(query_param: InstrumentedAttribute) -> int:
                 parameter = (
                     session.query(func.sum(query_param))
                     .filter(
                         self.post.group_id == group_id,
-                        self.post.date >= data["date"],
+                        self.post.date.between(to_date, from_date)
                     )
                     .first()[0]
                 )
                 return parameter
+
+            likes = get_sum_record(self.post.likes)
+            views = get_sum_record(self.post.views)
+            comments = get_sum_record(self.post.quantity_comments)
+            reposts = get_sum_record(self.post.reposts)
+
+            reactions = likes + comments + reposts
+            engagement_rate = float("{0:.2f}".format((reactions / (days * group_members)) * 100))
+            count_user_er = int(engagement_rate / 100 * group_members)
 
             statistic = {
                 "group_name": group_name,
                 "group_members": group_members,
                 "count_post": count_post,
                 "posts_with_photo": count_post_with_photo,
-                "likes": get_sum_record(input_data, self.post.likes),
-                "views": get_sum_record(input_data, self.post.views),
-                "comments": get_sum_record(input_data, self.post.quantity_comments),
-                "reposts": get_sum_record(input_data, self.post.reposts),
-                "to_date": self.get_to_date(input_data, group_id)
+                "likes": likes,
+                "views": views,
+                "comments": comments,
+                "reposts": reposts,
+                "engagement_rate": engagement_rate,
+                "er_users": count_user_er,
+                "to_date": to_date,
+                "from_date": from_date
             }
             return statistic
         return None
@@ -132,6 +142,15 @@ class Analytics:
                     .first()[0]
                 )
 
+                to_date = (
+                    session.query(self.post.date)
+                    .filter(
+                        self.post.group_id == group_id,
+                        self.post.date >= input_data["date"],
+                    )
+                    .first()[0]
+                )
+
                 # Название ссылки
                 if num == 1:
                     text = "🥇 Первое место"
@@ -143,7 +162,7 @@ class Analytics:
                 top_stat_url = {
                     "number": f"{text}",
                     "url": f"https://vk.com/{input_data['name']}?w=wall{owner_id}_{post_id}",
-                    "to_date": self.get_to_date(input_data, group_id)
+                    "to_date": to_date
                 }
                 top_stats_url_list.append(top_stat_url)
         return top_stats_url_list
