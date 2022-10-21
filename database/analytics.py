@@ -172,7 +172,7 @@ class Analytics:
         if choice == "choicePeriod":
             to_date = to_date_period
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-            days = (to_date - from_date).days
+            days = (datetime.now().replace(microsecond=0) - from_date).days
             line_slice = -3
             return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice}
         else:
