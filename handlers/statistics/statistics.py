@@ -118,8 +118,10 @@ async def load_period(message: types.Message, state: FSMContext):
 async def get_correct_date(choice: str, message: str) -> None | str:
     if choice == "choicePeriod":
         try:
+            if len(message) > 5:
+                raise ValueError
             days_datetime = timedelta(days=abs(int(message)))
-        except (ValueError, OverflowError) as err:
+        except ValueError as err:
             logger.warning(f"В команде /tops указан неверный параметр периода: {err}")
             return None
         return str(datetime.now() - days_datetime)[:-7]
