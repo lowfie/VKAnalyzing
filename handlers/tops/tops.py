@@ -88,6 +88,9 @@ async def load_period(message: types.Message, state: FSMContext):
             pos_urls = '\n'.join(f'{hlink(pos_post["number"], pos_post["url"])}' for pos_post in positive_post_list)
             neg_urls = '\n'.join(f'{hlink(neg_post["number"], neg_post["url"])}' for neg_post in negative_post_list)
 
+            if data["choice"] == "choicePeriod":
+                popular_post_list[0]["to_date"] = popular_post_list[0]["date_last_post"]
+
             text = (
                 f'<b>— Топ постов</b>\n\n'
                 f'<b>Топ {len(popular_post_list)} самых популярных поста\n</b>' + popular_urls + '\n\n' +

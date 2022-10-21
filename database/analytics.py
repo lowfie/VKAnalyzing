@@ -91,7 +91,8 @@ class Analytics:
                 "engagement_rate": engagement_rate,
                 "er_users": count_user_er,
                 "to_date": str(date_params["to_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]],
-                "from_date": str(date_params["from_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]]
+                "from_date": str(date_params["from_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]],
+                "date_last_post": date_params["date_last_post"]
             }
             return statistic
         return None
@@ -155,7 +156,8 @@ class Analytics:
                     "to_date": str(date_params["to_date"]
                                    .replace(second=0, microsecond=0))[:date_params["line_slice"]],
                     "from_date": str(date_params["from_date"]
-                                     .replace(second=0, microsecond=0))[:date_params["line_slice"]]
+                                     .replace(second=0, microsecond=0))[:date_params["line_slice"]],
+                    "date_last_post": date_params["date_last_post"]
                 }
                 top_stats_url_list.append(top_stat_url)
         return top_stats_url_list
@@ -170,11 +172,13 @@ class Analytics:
             .first()[0]
         )
         if choice == "choicePeriod":
-            to_date = to_date_period
+            to_date_last_post = to_date_period
+            to_date = datetime.now().replace(microsecond=0)
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-            days = (datetime.now().replace(microsecond=0) - from_date).days
+            days = (to_date - from_date).days
             line_slice = -3
-            return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice}
+            return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice,
+                    "date_last_post": to_date_last_post}
         else:
             to_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S") + timedelta(hours=24)
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
