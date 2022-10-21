@@ -25,7 +25,7 @@ async def cm_stats(message: types.Message):
 
 @dp.message_handler(state=ParseFormState.name, content_types=["text"])
 async def load_name(message: types.Message, state: FSMContext):
-    text = message.text
+    text = message.text.lower()
     parser_vk = VkParser()
 
     if len(text.split()) == 1:
