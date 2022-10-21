@@ -28,7 +28,7 @@ async def cm_stats(message: types.Message):
 async def load_name(message: types.Message, state: FSMContext):
     logger.info("Вызван Авто-парсинг")
 
-    text = message.text
+    text = message.text.lower()
 
     if len(text.split()) == 1:
         group = text.split()[0]
