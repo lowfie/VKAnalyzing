@@ -26,14 +26,7 @@ class Analytics:
         """
         service_group = GroupService(self.group)
         group_id = service_group.get_group_id(input_data["name"])
-        if input_data["choice"] == "choicePeriod":
-            from_date = datetime.now()
-            to_date = datetime.strptime(input_data["date"], "%Y-%m-%d %H:%M:%S")
-            days = (from_date - to_date).days
-        else:
-            from_date = datetime.strptime(input_data["date"], "%Y-%m-%d %H:%M:%S") + timedelta(hours=24)
-            to_date = datetime.strptime(input_data["date"], "%Y-%m-%d %H:%M:%S")
-            days = (from_date - to_date).days
+        date_params = self.get_date_params(input_data["choice"], input_data["date"], group_id)
 
         if group_id:
             # Количество подписчиков группы
@@ -50,7 +43,7 @@ class Analytics:
                 session.query(func.count(self.post.post_id))
                 .filter(
                     self.post.group_id == group_id,
-                    self.post.date.between(to_date, from_date)
+                    self.post.date.between(date_params["from_date"], date_params["to_date"])
                 )
                 .first()[0]
             )
@@ -60,7 +53,7 @@ class Analytics:
                 session.query(func.count(self.post.post_id))
                 .filter(
                     self.post.group_id == group_id,
-                    self.post.date.between(to_date, from_date),
+                    self.post.date.between(date_params["from_date"], date_params["to_date"]),
                     self.post.photo == "true",
                 )
                 .first()[0]
@@ -71,7 +64,7 @@ class Analytics:
                     session.query(func.sum(query_param))
                     .filter(
                         self.post.group_id == group_id,
-                        self.post.date.between(to_date, from_date)
+                        self.post.date.between(date_params["from_date"], date_params["to_date"])
                     )
                     .first()[0]
                 )
@@ -83,7 +76,7 @@ class Analytics:
             reposts = get_sum_record(self.post.reposts)
 
             reactions = likes + comments + reposts
-            engagement_rate = float("{0:.2f}".format((reactions / (days * group_members)) * 100))
+            engagement_rate = float("{0:.2f}".format((reactions / (date_params["days"] * group_members)) * 100))
             count_user_er = int(engagement_rate / 100 * group_members)
 
             statistic = {
@@ -97,13 +90,13 @@ class Analytics:
                 "reposts": reposts,
                 "engagement_rate": engagement_rate,
                 "er_users": count_user_er,
-                "to_date": to_date,
-                "from_date": from_date
+                "to_date": str(date_params["to_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]],
+                "from_date": str(date_params["from_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]]
             }
             return statistic
         return None
 
-    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> list[dict[str, Any]]:
+    def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> None | list[dict[str, Any]]:
         """
         Функция принимает словарь со значением и параметром.
         Ведёт подсчёт максимального параметра и на основе этого
@@ -112,24 +105,29 @@ class Analytics:
         service_group = GroupService(self.group)
         group_id = service_group.get_group_id(input_data["name"])
         top_stats_url_list = []
+        date_params = self.get_date_params(input_data["choice"], input_data["date"], group_id)
 
         if group_id:
             max_values_record = (
                 session.query(query_param)
                 .distinct()
                 .filter(
-                    self.post.group_id == group_id, self.post.date >= input_data["date"]
+                    self.post.group_id == group_id,
+                    self.post.date.between(date_params["from_date"], date_params["to_date"])
                 )
                 .order_by(query_param.desc())
                 .limit(3)
                 .all()
             )
+            if not max_values_record:
+                return None
+
             for num, max_value_record in enumerate(max_values_record, start=1):
                 owner_id = (
                     session.query(self.post.owner_id)
                     .filter(
                         self.post.group_id == group_id,
-                        self.post.date >= input_data["date"],
+                        self.post.date.between(date_params["from_date"], date_params["to_date"]),
                         query_param == max_value_record[0]
                     )
                     .first()[0]
@@ -137,16 +135,8 @@ class Analytics:
                 post_id = (
                     session.query(self.post.post_id)
                     .filter(
-                        self.post.owner_id == owner_id, query_param == max_value_record[0]
-                    )
-                    .first()[0]
-                )
-
-                to_date = (
-                    session.query(self.post.date)
-                    .filter(
-                        self.post.group_id == group_id,
-                        self.post.date >= input_data["date"],
+                        self.post.owner_id == owner_id,
+                        query_param == max_value_record[0]
                     )
                     .first()[0]
                 )
@@ -162,7 +152,32 @@ class Analytics:
                 top_stat_url = {
                     "number": f"{text}",
                     "url": f"https://vk.com/{input_data['name']}?w=wall{owner_id}_{post_id}",
-                    "to_date": to_date
+                    "to_date": str(date_params["to_date"]
+                                   .replace(second=0, microsecond=0))[:date_params["line_slice"]],
+                    "from_date": str(date_params["from_date"]
+                                     .replace(second=0, microsecond=0))[:date_params["line_slice"]]
                 }
                 top_stats_url_list.append(top_stat_url)
         return top_stats_url_list
+
+    def get_date_params(self, choice: str, date: str, group_id: int) -> dict[str, Any]:
+        to_date_period = (
+            session.query(self.post.date)
+            .filter(
+                self.post.group_id == group_id,
+                self.post.date >= date,
+            )
+            .first()[0]
+        )
+        if choice == "choicePeriod":
+            to_date = to_date_period
+            from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            days = (to_date - from_date).days
+            line_slice = -3
+            return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice}
+        else:
+            to_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S") + timedelta(hours=24)
+            from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            days = (to_date - from_date).days
+            line_slice = -8
+            return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice}

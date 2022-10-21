@@ -30,11 +30,11 @@ async def cm_stats(message: types.Message):
 @dp.message_handler(state=StatisticsFormState.name, content_types=["text"])
 async def load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data["name"] = message.text
+        data["name"] = message.text.lower()
 
     await message.reply(
         "⌨ Укажите предпочтительный способ подсчёта статистики",
-        reply_markup=await choice_date_period_keyboards(),
+        reply_markup=await choice_date_period_keyboards()
     )
     await StatisticsFormState.next()
 
@@ -66,28 +66,16 @@ async def choice_data_period(call: types.CallbackQuery, state: FSMContext):
 async def load_period(message: types.Message, state: FSMContext):
     analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
-        if data["choice"] == "choicePeriod":
-            try:
-                days_datetime = timedelta(days=abs(int(message.text)))
-            except (OverflowError, ValueError) as err:
-                logger.warning(f"В команде /stats указан неверный параметр периода: {err}")
-                await message.reply(
-                    "❗ Вы ввели некорректное значение, попробуйте ещё раз",
-                    reply_markup=await main_keyboard())
-                await state.finish()
-                return
-            data["date"] = str(datetime.now() - days_datetime)[:-7]
+        date = await get_correct_date(data["choice"], message.text)
+
+        if date is None:
+            await message.reply(
+                "❗ Вы ввели некорректное значение, попробуйте ещё раз",
+                reply_markup=await main_keyboard())
+            await state.finish()
+            return
         else:
-            try:
-                date = datetime.strptime(message.text, "%d.%m.%Y")
-            except (OverflowError, ValueError) as err:
-                logger.warning(f"В команде /stats указан неверный параметр даты: {err}")
-                await message.reply(
-                    "❗ Вы ввели некорректное значение, попробуйте ещё раз",
-                    reply_markup=await main_keyboard())
-                await state.finish()
-                return
-            data["date"] = str(date)
+            data["date"] = date
 
         try:
             statistics = analysis.get_statistic(data)
@@ -125,3 +113,20 @@ async def load_period(message: types.Message, state: FSMContext):
 
         await message.answer(text=text, reply_markup=await main_keyboard())
         await state.finish()
+
+
+async def get_correct_date(choice: str, message: str) -> None | str:
+    if choice == "choicePeriod":
+        try:
+            days_datetime = timedelta(days=abs(int(message)))
+        except (ValueError, OverflowError) as err:
+            logger.warning(f"В команде /tops указан неверный параметр периода: {err}")
+            return None
+        return str(datetime.now() - days_datetime)[:-7]
+    else:
+        try:
+            date = datetime.strptime(message, "%d.%m.%Y")
+        except (ValueError, OverflowError) as err:
+            logger.warning(f"В команде /tops указан неверный параметр даты: {err}")
+            return None
+        return str(date)
