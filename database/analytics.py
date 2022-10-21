@@ -177,11 +177,11 @@ class Analytics:
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
             days = (to_date - from_date).days
             line_slice = -3
-            return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice,
-                    "date_last_post": to_date_last_post}
         else:
+            to_date_last_post = to_date_period
             to_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S") + timedelta(hours=24)
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
             days = (to_date - from_date).days
             line_slice = -8
-            return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice}
+        return {"to_date": to_date, "from_date": from_date, "days": days, "line_slice": line_slice,
+                "date_last_post": to_date_last_post}
