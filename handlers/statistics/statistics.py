@@ -88,9 +88,6 @@ async def load_period(message: types.Message, state: FSMContext):
             return
 
         if statistics is not None and statistics["count_post"] > 0:
-            if data["choice"] == "choicePeriod":
-                statistics["to_date"] = statistics["date_last_post"]
-
             text = (
                 f'<b>— Статистика</b>\n\n'
                 f'<b>{statistics["group_name"]}: {statistics["group_members"]}</b>\n\n'

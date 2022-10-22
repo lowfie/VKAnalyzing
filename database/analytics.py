@@ -79,7 +79,7 @@ class Analytics:
             engagement_rate = float("{0:.2f}".format((reactions / (date_params["days"] * group_members)) * 100))
             count_user_er = int(engagement_rate / 100 * group_members)
 
-            statistic = {
+            statistics = {
                 "group_name": group_name,
                 "group_members": group_members,
                 "count_post": count_post,
@@ -94,7 +94,9 @@ class Analytics:
                 "from_date": str(date_params["from_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]],
                 "date_last_post": date_params["date_last_post"]
             }
-            return statistic
+            if input_data["choice"] == "choicePeriod":
+                statistics["to_date"] = statistics["date_last_post"]
+            return statistics
         return None
 
     def get_top_stats(self, input_data: dict[str, str], query_param: InstrumentedAttribute) -> None | list[dict[str, Any]]:
@@ -159,6 +161,9 @@ class Analytics:
                                      .replace(second=0, microsecond=0))[:date_params["line_slice"]],
                     "date_last_post": date_params["date_last_post"]
                 }
+                if input_data["choice"] == "choicePeriod":
+                    top_stat_url["to_date"] = top_stat_url["date_last_post"]
+
                 top_stats_url_list.append(top_stat_url)
         return top_stats_url_list
 
