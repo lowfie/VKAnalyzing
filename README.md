@@ -1,4 +1,4 @@
-# Аналитический телеграмм-бот для ВК (Тестовая версия, будут патчи)
+# Аналитический телеграмм-бот для ВК
 
 Удобный аналитический бот, который поможет мониторить группы ВК, следить за реакцией пользователей и статистикой
 
@@ -12,10 +12,18 @@
 1. Клонируйте репозиторий с GitHub `git clone https://github.com/lowfie/VkAnalyzing.git`
 2. Создайте виртуальное окружение
 3. Установите зависимости `pip install -r requirements.txt`
-4. Добавьте файл `.env` в директорию `data`
+4. Добавьте файл `.env` в корневую директорию
 5. Установите docker для вашей ОС
 
-Запустите локальную БД для работы FSM в aiogram и PostgreSQL для сбора данных:
+Также необходимо скачать веса для модели нейросети
+```
+python -m dostoevsky download fasttext-social-network-model
+```
+Если у вас Windows, то возможны проблемы с установкой FastText 
+- **Можете найти FastText [*здесь*](https://www.lfd.uci.edu/~gohlke/pythonlibs/)**
+
+Запустите (брокер) Redis для работы FSM в aiogram
+Также (хранилище) PostgreSQL для сбора данных:
 ```
 docker run -p 6379:6379 -d redis
 docker run -p 5432:5432 -e POSTGRES_PASSWORD=123 -d postgres
