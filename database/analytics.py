@@ -159,9 +159,9 @@ class Analytics:
                 self.post.date >= date,
             ).first()
         if choice == "choicePeriod":
-            to_date_last_post = to_date_period.date
             to_date = datetime.now().replace(microsecond=0)
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+            to_date_last_post = to_date_period.date if to_date_period is not None else to_date
             days = (to_date - from_date).days
             line_slice = -3
         else:
