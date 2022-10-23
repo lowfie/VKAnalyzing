@@ -1,9 +1,9 @@
-from loader import session
+from database.models import Group, Post, Comment
+from sqlalchemy import inspect
 
+from loader import session, engine, Base
 from loguru import logger
-
 from typing import Any
-from loader import Base
 
 
 class GroupService:
@@ -160,3 +160,16 @@ class CommentService:
         except Exception as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
+
+
+def table_exist(table_name: str) -> bool:
+    return inspect(engine).has_table(table_name)
+
+
+def create_tables_if_not_exist() -> None:
+    """Автоматическое создание моделей при запуске"""
+    models = [Post, Comment, Group]
+    existing_tables = [table_exist(name.__tablename__) for name in models]
+    if not all(existing_tables):
+        Base.metadata.create_all(bind=engine)
+        logger.info("Таблицы созданы, так как их не было в базе данных!")
