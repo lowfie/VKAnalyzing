@@ -5,6 +5,7 @@ from loader import dp
 from loguru import logger
 from aiogram import executor
 from modules.tasks import schedule
+from database.exceptions import DBInitError
 from database.services import create_tables_if_not_exist
 
 
@@ -13,7 +14,7 @@ async def on_startup(dispatcher):
     try:
         logger.info("the bot has been successfully start")
         create_tables_if_not_exist()
-    except Exception as err:
+    except DBInitError as err:
         logger.error(f"Ошибка инициализации БД: {err}")
 
 

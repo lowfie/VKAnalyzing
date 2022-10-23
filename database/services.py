@@ -1,6 +1,7 @@
 from typing import Any
 from loguru import logger
 from sqlalchemy import inspect
+from exceptions import DBSaveError
 from loader import session, engine, Base
 from database.models import Group, Post, Comment
 
@@ -17,7 +18,7 @@ class GroupService:
         session.bulk_insert_mappings(self.group, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -29,7 +30,7 @@ class GroupService:
         session.bulk_update_mappings(self.group, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -67,7 +68,7 @@ class GroupService:
 
             try:
                 session.commit()
-            except Exception as err:
+            except DBSaveError as err:
                 logger.error(
                     f"Произошла ошибка при обновлении статуса авто-парсинга: {err}"
                 )
@@ -88,7 +89,7 @@ class PostService:
         session.bulk_insert_mappings(self.post, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -100,7 +101,7 @@ class PostService:
         session.bulk_update_mappings(self.post, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -127,7 +128,7 @@ class PostService:
             ).update(tone)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при обновлении тональности: {err}")
             session.rollback()
 
@@ -144,7 +145,7 @@ class CommentService:
         session.bulk_insert_mappings(self.comment, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -156,7 +157,7 @@ class CommentService:
         session.bulk_update_mappings(self.comment, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
