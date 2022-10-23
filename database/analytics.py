@@ -126,23 +126,11 @@ class Analytics:
                 return None
 
             for num, max_value_record in enumerate(max_values_record, start=1):
-                owner_id = (
-                    session.query(self.post.owner_id)
-                    .filter(
-                        self.post.group_id == group_id,
-                        self.post.date.between(date_params["from_date"], date_params["to_date"]),
-                        query_param == max_value_record[0]
-                    )
-                    .first()[0]
-                )
-                post_id = (
-                    session.query(self.post.post_id)
-                    .filter(
-                        self.post.owner_id == owner_id,
-                        query_param == max_value_record[0]
-                    )
-                    .first()[0]
-                )
+                post = session.query(self.post).filter(
+                    self.post.group_id == group_id,
+                    self.post.date.between(date_params["from_date"], date_params["to_date"]),
+                    query_param == max_value_record[0]
+                ).first()
 
                 # Название ссылки
                 if num == 1:
@@ -154,11 +142,9 @@ class Analytics:
 
                 top_stat_url = {
                     "number": f"{text}",
-                    "url": f"https://vk.com/{input_data['name']}?w=wall{owner_id}_{post_id}",
-                    "to_date": str(date_params["to_date"]
-                                   .replace(second=0, microsecond=0))[:date_params["line_slice"]],
-                    "from_date": str(date_params["from_date"]
-                                     .replace(second=0, microsecond=0))[:date_params["line_slice"]],
+                    "url": f"https://vk.com/{input_data['name']}?w=wall{post.owner_id}_{post.post_id}",
+                    "to_date": str(date_params["to_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]],
+                    "from_date": str(date_params["from_date"].replace(second=0, microsecond=0))[:date_params["line_slice"]],
                     "date_last_post": date_params["date_last_post"]
                 }
                 if input_data["choice"] == "choicePeriod":
@@ -168,16 +154,12 @@ class Analytics:
         return top_stats_url_list
 
     def get_date_params(self, choice: str, date: str, group_id: int) -> dict[str, Any]:
-        to_date_period = (
-            session.query(self.post.date)
-            .filter(
+        to_date_period = session.query(self.post).filter(
                 self.post.group_id == group_id,
                 self.post.date >= date,
-            )
-            .first()[0]
-        )
+            ).first()
         if choice == "choicePeriod":
-            to_date_last_post = to_date_period
+            to_date_last_post = to_date_period.date
             to_date = datetime.now().replace(microsecond=0)
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
             days = (to_date - from_date).days
