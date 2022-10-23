@@ -1,11 +1,9 @@
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-from loader import session, Base
-from sqlalchemy import func
-
-from database.services import GroupService
-
-from datetime import datetime, timedelta
 from typing import Any
+from sqlalchemy import func
+from loader import session, Base
+from datetime import datetime, timedelta
+from database.services import GroupService
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 
 class Analytics:

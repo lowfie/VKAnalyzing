@@ -1,12 +1,10 @@
 import asyncio
 import aioschedule
 
-from database.models import Group
-from loader import session
-
-from modules.parse_vk_group import VkParser
-
 from loguru import logger
+from loader import session
+from database.models import Group
+from modules.parse_vk_group import VkParser
 
 
 async def autoparse_vk():

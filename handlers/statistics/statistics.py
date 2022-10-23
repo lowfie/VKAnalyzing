@@ -1,19 +1,16 @@
-from aiogram import types
-from aiogram.dispatcher import FSMContext
 from loader import dp
-
-from datetime import datetime, timedelta
-
+from loguru import logger
+from aiogram import types
 from database import Analytics
 from database.models import Group, Post
+from datetime import datetime, timedelta
+from aiogram.dispatcher import FSMContext
+from .statistics_state import StatisticsFormState
 
-from loguru import logger
-
-from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
 from keyboards.reply.menu_keyboard import main_keyboard
+from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
 from keyboards.inline.choose_date_period import choice_date_period_keyboards
 
-from .statistics_state import StatisticsFormState
 from handlers.cancel_state_handler import cancel_handler
 
 

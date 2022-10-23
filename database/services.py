@@ -1,9 +1,8 @@
-from database.models import Group, Post, Comment
-from sqlalchemy import inspect
-
-from loader import session, engine, Base
-from loguru import logger
 from typing import Any
+from loguru import logger
+from sqlalchemy import inspect
+from loader import session, engine, Base
+from database.models import Group, Post, Comment
 
 
 class GroupService:

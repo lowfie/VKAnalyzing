@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, BigInteger, Text, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-
 from loader import Base, engine
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, BigInteger, Text, Boolean, DateTime, ForeignKey
 
 
 class Group(Base):

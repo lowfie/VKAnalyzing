@@ -1,9 +1,8 @@
+from loader import dp
+from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandHelp
 
 from keyboards.reply.menu_keyboard import main_keyboard
-
-from aiogram import types
-from loader import dp
 
 
 @dp.message_handler(CommandHelp())

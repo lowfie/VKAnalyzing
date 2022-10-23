@@ -16,8 +16,8 @@ from data.config import (
     DATABASE_REDIS,
 )
 
-from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
+from aiogram import Bot, Dispatcher
 from aiogram import types
 
 from loguru import logger
