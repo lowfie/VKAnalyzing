@@ -51,7 +51,9 @@ class VkParser:
         try:
             get_group = httpx.get(self.groups_getGroup, params=params_get_group).json()["response"][0]
         except KeyError:
-            logger.warning('Ошибка парсинга группы (Ошибка get-запроса: невозможно собрать данные)')
+            logger.warning(
+                "Ошибка парсинга группы (Ошибка get-запроса: невозможно собрать данные)"
+            )
             return False
 
         params_group_members = {
@@ -76,10 +78,10 @@ class VkParser:
 
         # Сохранение и обновление данных групп в бд
         if (
-                session.query(Group)
-                        .filter(Group.group_id == group_data["group_id"])
-                        .first()
-                is None
+            session.query(Group)
+            .filter(Group.group_id == group_data["group_id"])
+            .first()
+            is None
         ):
             # Формирование списка с данным для сбора постов
             self.group_metadata.append(group_data)
@@ -125,10 +127,10 @@ class VkParser:
                     "date": datetime.fromtimestamp(post["date"]),
                 }
                 if (
-                        session.query(Post)
-                                .filter(Post.post_id == post_data["post_id"])
-                                .first()
-                        is None
+                    session.query(Post)
+                    .filter(Post.post_id == post_data["post_id"])
+                    .first()
+                    is None
                 ):
                     self.posts_metadata.append(post_data)
                 else:
@@ -179,11 +181,15 @@ class VkParser:
                 await asyncio.sleep(1)
 
             # получение всех комментариев (по 25 постов)
-            response = httpx.get(self.url + 'execute/', params=params).json()
+            response = httpx.get(self.url + "execute/", params=params).json()
 
             # итерация постов и комментариев поста
             for post in response["response"]:
-                tones_post = {"post_id": None, "positive_comments": 0, "negative_comments": 0}
+                tones_post = {
+                    "post_id": None,
+                    "positive_comments": 0,
+                    "negative_comments": 0,
+                }
                 for comment in post["items"]:
                     # Убираем комменты в которых мало символов
                     if len(comment["text"]) > 0:
@@ -198,7 +204,12 @@ class VkParser:
                         tones_post["post_id"] = comment_data["post_id"]
 
                         # проверка на существование коммента в бд
-                        if session.query(Comment).filter(Comment.comment_id == comment_data["comment_id"]).first() is None:
+                        if (
+                            session.query(Comment)
+                            .filter(Comment.comment_id == comment_data["comment_id"])
+                            .first()
+                            is None
+                        ):
                             # подсчёт позитивных/негативных комментариев поста
                             if tone == "positive":
                                 tones_post["post_id"] = comment["post_id"]

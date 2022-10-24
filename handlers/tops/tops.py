@@ -22,7 +22,7 @@ async def cm_tops(message: types.Message):
 
     await message.reply(
         "⌨ Введите название группы из ссылки",
-        reply_markup=await cancel_state_keyboard()
+        reply_markup=await cancel_state_keyboard(),
     )
 
 
@@ -33,12 +33,14 @@ async def load_name(message: types.Message, state: FSMContext):
 
     await message.reply(
         "⌨ Укажите предпочтительный способ подсчёта статистики",
-        reply_markup=await choice_date_period_keyboards()
+        reply_markup=await choice_date_period_keyboards(),
     )
     await TopsFormState.next()
 
 
-@dp.callback_query_handler(state=TopsFormState.choice_date_period, text_contains='choice')
+@dp.callback_query_handler(
+    state=TopsFormState.choice_date_period, text_contains="choice"
+)
 async def choice_data_period(call: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["choice"] = call.data
@@ -47,7 +49,7 @@ async def choice_data_period(call: types.CallbackQuery, state: FSMContext):
             await dp.bot.send_message(
                 call.from_user.id,
                 "⌨ Введите период подсчёта статистики <b>(в днях)</b>",
-                reply_markup=await cancel_state_keyboard()
+                reply_markup=await cancel_state_keyboard(),
             )
         else:
             await dp.bot.send_message(
@@ -55,7 +57,7 @@ async def choice_data_period(call: types.CallbackQuery, state: FSMContext):
                 "⌨ Введите дату подсчёта статистики\n\n"
                 "❗ Формат: <b>день.месяц.год</b>\n\n"
                 "Пример: <b><i>20.10.2022</i></b>",
-                reply_markup=await cancel_state_keyboard()
+                reply_markup=await cancel_state_keyboard(),
             )
 
     await TopsFormState.next()
@@ -70,7 +72,8 @@ async def load_period(message: types.Message, state: FSMContext):
         if date is None:
             await message.reply(
                 "❗ Вы ввели некорректное значение, попробуйте ещё раз",
-                reply_markup=await main_keyboard())
+                reply_markup=await main_keyboard(),
+            )
             await state.finish()
             return
         else:
@@ -80,17 +83,33 @@ async def load_period(message: types.Message, state: FSMContext):
         negative_post_list = analysis.get_top_stats(data, Post.negative_comments)
         popular_post_list = analysis.get_top_stats(data, Post.views)
 
-        if (positive_post_list and negative_post_list and popular_post_list) is not None:
-            popular_urls = '\n'.join(f'{hlink(pop_post["number"], pop_post["url"])}' for pop_post in popular_post_list)
-            pos_urls = '\n'.join(f'{hlink(pos_post["number"], pos_post["url"])}' for pos_post in positive_post_list)
-            neg_urls = '\n'.join(f'{hlink(neg_post["number"], neg_post["url"])}' for neg_post in negative_post_list)
+        if (
+            positive_post_list and negative_post_list and popular_post_list
+        ) is not None:
+            popular_urls = "\n".join(
+                f'{hlink(pop_post["number"], pop_post["url"])}'
+                for pop_post in popular_post_list
+            )
+            pos_urls = "\n".join(
+                f'{hlink(pos_post["number"], pos_post["url"])}'
+                for pos_post in positive_post_list
+            )
+            neg_urls = "\n".join(
+                f'{hlink(neg_post["number"], neg_post["url"])}'
+                for neg_post in negative_post_list
+            )
 
             text = (
-                f'<b>— Топ постов</b>\n\n'
-                f'<b>Топ {len(popular_post_list)} самых популярных поста\n</b>' + popular_urls + '\n\n' +
-                f'<b>Топ {len(positive_post_list)} самых позитивных поста\n</b>' + pos_urls + '\n\n' +
-                f'<b>Топ {len(negative_post_list)} самых негативных поста\n</b>' + neg_urls + '\n\n'
-
+                f"<b>— Топ постов</b>\n\n"
+                f"<b>Топ {len(popular_post_list)} самых популярных поста\n</b>"
+                + popular_urls
+                + "\n\n"
+                + f"<b>Топ {len(positive_post_list)} самых позитивных поста\n</b>"
+                + pos_urls
+                + "\n\n"
+                + f"<b>Топ {len(negative_post_list)} самых негативных поста\n</b>"
+                + neg_urls
+                + "\n\n"
                 f'Период: <b>{popular_post_list[0]["from_date"]} — {popular_post_list[0]["to_date"]}</b>'
             )
             parse_mode = "html"
@@ -106,7 +125,7 @@ async def load_period(message: types.Message, state: FSMContext):
             text=text,
             disable_web_page_preview=True,
             parse_mode=parse_mode,
-            reply_markup=await main_keyboard()
+            reply_markup=await main_keyboard(),
         )
         await state.finish()
 
