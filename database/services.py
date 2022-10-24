@@ -1,8 +1,8 @@
 from typing import Any
 from loguru import logger
 from sqlalchemy import inspect
-from exceptions import DBSaveError
 from loader import session, engine, Base
+from database.exceptions import DBSaveError
 from database.models import Group, Post, Comment
 
 
