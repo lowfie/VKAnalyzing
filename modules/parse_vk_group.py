@@ -76,10 +76,10 @@ class VkParser:
 
         # Сохранение и обновление данных групп в бд
         if (
-            session.query(Group)
-            .filter(Group.group_id == group_data["group_id"])
-            .first()
-            is None
+                session.query(Group)
+                        .filter(Group.group_id == group_data["group_id"])
+                        .first()
+                is None
         ):
             # Формирование списка с данным для сбора постов
             self.group_metadata.append(group_data)
@@ -125,10 +125,10 @@ class VkParser:
                     "date": datetime.fromtimestamp(post["date"]),
                 }
                 if (
-                    session.query(Post)
-                    .filter(Post.post_id == post_data["post_id"])
-                    .first()
-                    is None
+                        session.query(Post)
+                                .filter(Post.post_id == post_data["post_id"])
+                                .first()
+                        is None
                 ):
                     self.posts_metadata.append(post_data)
                 else:
@@ -151,56 +151,68 @@ class VkParser:
 
         # Перебор всех постов для получения комментариев
         all_posts = self.posts_metadata + self.posts_update_metadata
+        execute_methods = ""
+        codes = []
+
         for num, post in enumerate(all_posts, start=1):
+            if num % 25 != 0:
+                execute_methods += f"""API.wall.getComments({{"owner_id": {post['owner_id']}, count: {100}, "post_id": {post['post_id']}}}), """
+            else:
+                execute_methods += f"""API.wall.getComments({{"owner_id": {post['owner_id']}, count: {100}, "post_id": {post['post_id']}}}), """
+                codes.append(execute_methods)
+                execute_methods = ""
+        codes.append(execute_methods)
+
+        # Итерация методов поста для общего парсинга
+        for num, code in enumerate(codes, start=1):
+            code = f"return [{code}];"
             params = {
-                "owner_id": post["owner_id"],
-                "post_id": post["post_id"],
                 "count": 100,
+                "code": code,
                 "sort": "desc",
                 "access_token": VK_TOKEN,
                 "v": self.vk_version,
             }
-            response = httpx.get(self.wall_getComments, params=params).json()
 
             # Обход ограничение на 5 запросов в секунду
-            if num % 4 == 0:
-                await asyncio.sleep(2)
+            if num % 3 == 0:
+                await asyncio.sleep(1)
 
-            # Список количества позитивных/негативных комментариев у поста
-            tones_post = {
-                "post_id": post["post_id"],
-                "positive_comments": 0,
-                "negative_comments": 0,
-            }
+            # получение всех комментариев (по 25 постов)
+            response = httpx.get(self.url + 'execute/', params=params).json()
 
-            # Итерация всех комментариев поста
-            for comment in response["response"]["items"]:
-                if len(comment["text"].split()) > 1:
-                    # Добавление данных в бд
-                    tone = self.sentiment_model.set_tone_comment([comment["text"]])
-                    comment_data = {
-                        "comment_id": comment["id"],
-                        "post_id": post["post_id"],
-                        "text": comment["text"],
-                        "tone": tone,
-                    }
-                    if (
-                        session.query(Comment)
-                        .filter(Comment.comment_id == comment_data["comment_id"])
-                        .first()
-                        is None
-                    ):
-                        self.comments_metadata.append(comment_data)
-                        # подсчёт позитивных/негативных комментариев поста
-                        if tone == "positive":
-                            tones_post["positive_comments"] += 1
-                        elif tone == "negative":
-                            tones_post["negative_comments"] += 1
-                    else:
-                        self.comments_update_metadata.append(comment_data)
+            # итерация постов и комментариев поста
+            for post in response["response"]:
+                tones_post = {"post_id": None, "positive_comments": 0, "negative_comments": 0}
+                for comment in post["items"]:
+                    # Убираем комменты в которых мало символов
+                    if len(comment["text"]) > 0:
+                        # Добавление данных в бд
+                        tone = self.sentiment_model.set_tone_comment([comment["text"]])
+                        comment_data = {
+                            "comment_id": comment["id"],
+                            "post_id": comment["post_id"],
+                            "text": comment["text"],
+                            "tone": tone,
+                        }
+                        tones_post["post_id"] = comment_data["post_id"]
 
-            # Обновление количества позитивных/негативных комментариев поста
-            service_post.update_tonal_comments(tones_post)
+                        # проверка на существование коммента в бд
+                        if session.query(Comment).filter(Comment.comment_id == comment_data["comment_id"]).first() is None:
+                            # подсчёт позитивных/негативных комментариев поста
+                            if tone == "positive":
+                                tones_post["post_id"] = comment["post_id"]
+                                tones_post["positive_comments"] += 1
+                            elif tone == "negative":
+                                tones_post["post_id"] = comment["post_id"]
+                                tones_post["negative_comments"] += 1
+                            self.comments_metadata.append(comment_data)
+                        else:
+                            self.comments_update_metadata.append(comment_data)
+
+                # Обновление количества позитивных/негативных комментариев поста
+                if tones_post["post_id"] is not None:
+                    service_post.update_tonal_comments(tones_post)
 
         service_comment.add_all(self.comments_metadata)
         service_comment.update_all(self.comments_update_metadata)
