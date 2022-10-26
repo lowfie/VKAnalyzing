@@ -38,12 +38,12 @@ class GroupService:
         """
         Функция принимает название группы и отдаёт её ID
         """
-        group_id = (
-            session.query(self.group.group_id)
+        group = (
+            session.query(self.group)
             .filter(self.group.screen_name == screen_name)
             .first()
         )
-        group_id = group_id[0] if group_id else group_id
+        group_id = group.group_id if group is not None else None
         return group_id
 
     def set_autoparsing_group(self, group_name: str) -> bool | None:
