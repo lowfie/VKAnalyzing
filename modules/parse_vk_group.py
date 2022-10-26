@@ -145,6 +145,21 @@ class VkParser:
         Парсинг комментариев поста
         И занесение данных в бд
         """
+
+        # функция возвращает список с методами для получения комментариев
+        def getcomments_methods(posts):
+            execute_methods = ""
+            methods = []
+            for number_post, post in enumerate(posts, start=1):
+                if number_post % 25 != 0:
+                    execute_methods += f"""API.wall.getComments({{"owner_id": {post['owner_id']}, count: {100}, "post_id": {post['post_id']}}}), """
+                else:
+                    execute_methods += f"""API.wall.getComments({{"owner_id": {post['owner_id']}, count: {100}, "post_id": {post['post_id']}}}), """
+                    methods.append(execute_methods)
+                    execute_methods = ""
+            methods.append(execute_methods)
+            return methods
+
         logger.info(f"Начался сбор комментариев")
 
         # Инициализация класса для сохранения в бд
@@ -153,17 +168,7 @@ class VkParser:
 
         # Перебор всех постов для получения комментариев
         all_posts = self.posts_metadata + self.posts_update_metadata
-        execute_methods = ""
-        codes = []
-
-        for num, post in enumerate(all_posts, start=1):
-            if num % 25 != 0:
-                execute_methods += f"""API.wall.getComments({{"owner_id": {post['owner_id']}, count: {100}, "post_id": {post['post_id']}}}), """
-            else:
-                execute_methods += f"""API.wall.getComments({{"owner_id": {post['owner_id']}, count: {100}, "post_id": {post['post_id']}}}), """
-                codes.append(execute_methods)
-                execute_methods = ""
-        codes.append(execute_methods)
+        codes = getcomments_methods(all_posts)
 
         # Итерация методов поста для общего парсинга
         for num, code in enumerate(codes, start=1):
