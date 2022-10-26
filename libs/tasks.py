@@ -4,7 +4,7 @@ import aioschedule
 from loguru import logger
 from loader import session
 from database.models import Group
-from modules.parse_vk_group import VkParser
+from libs.vk_parser import VkParser
 
 
 async def autoparse_vk():

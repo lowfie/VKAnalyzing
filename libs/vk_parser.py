@@ -5,12 +5,12 @@ from typing import Any
 from loguru import logger
 from loader import session
 from datetime import datetime
-from data.config import VK_TOKEN
+from settings.config import VK_TOKEN
 
 from database.models import Post, Comment, Group
 from database import PostService, CommentService, GroupService
 
-from modules.sentiment_neural_network import SentimentalAnalysisModel
+from libs.ml_lib import SentimentalAnalysisModel
 
 
 class VkParser:

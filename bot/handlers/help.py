@@ -1,12 +1,8 @@
-from loader import dp
 from aiogram import types
-from aiogram.dispatcher.filters.builtin import CommandHelp
 
-from keyboards.reply.menu_keyboard import main_keyboard
+from bot.keyboards.reply.menu_keyboard import main_keyboard
 
 
-@dp.message_handler(CommandHelp())
-@dp.message_handler(regexp="^(❓ Помощь)$")
 async def cmd_help(message: types.Message):
     text = (
         "<b>— Что может этот бот?</b>\n\n"

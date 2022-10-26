@@ -5,7 +5,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
-from keyboards.reply.menu_keyboard import main_keyboard
+from bot.keyboards.reply.menu_keyboard import main_keyboard
 
 
 @dp.message_handler(state="*", commands=["cancel", "отмена"])

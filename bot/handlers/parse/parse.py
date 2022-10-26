@@ -1,20 +1,15 @@
-from loader import dp
 from loguru import logger
 from aiogram import types
 
+from libs.vk_parser import VkParser
 from .parse_state import ParseFormState
-from modules.parse_vk_group import VkParser
 from aiogram.dispatcher import FSMContext
 
-from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
-from keyboards.reply.menu_keyboard import main_keyboard
-
-from handlers.cancel_state_handler import cancel_handler
+from bot.keyboards.reply.menu_keyboard import main_keyboard
+from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
 
 
-@dp.message_handler(commands="parse", state=None)
-@dp.message_handler(regexp="^(🔨 Спарсить группу)$")
-async def cm_stats(message: types.Message):
+async def cm_parse(message: types.Message):
     await ParseFormState.name.set()
     await message.reply(
         "⌨ Введите название группы из ссылки\n",
@@ -22,8 +17,7 @@ async def cm_stats(message: types.Message):
     )
 
 
-@dp.message_handler(state=ParseFormState.name, content_types=["text"])
-async def load_name(message: types.Message, state: FSMContext):
+async def parse_load_name(message: types.Message, state: FSMContext):
     text = message.text.lower()
     parser_vk = VkParser()
 

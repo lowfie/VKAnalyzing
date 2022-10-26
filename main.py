@@ -1,10 +1,9 @@
 import asyncio
-import handlers
 
 from loader import dp
 from loguru import logger
 from aiogram import executor
-from modules.tasks import schedule
+from libs.tasks import schedule
 from database.exceptions import DBInitError
 from database.services import create_tables_if_not_exist
 

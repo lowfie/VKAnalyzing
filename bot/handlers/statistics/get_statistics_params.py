@@ -1,21 +1,16 @@
-from loader import dp
 from loguru import logger
 from aiogram import types
-from database import Analytics
+from analytics import Analytics
 from database.models import Group, Post
 from datetime import datetime, timedelta
 from aiogram.dispatcher import FSMContext
 from .statistics_state import StatisticsFormState
 
-from keyboards.reply.menu_keyboard import main_keyboard
-from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
-from keyboards.inline.choose_date_period import choice_date_period_keyboards
-
-from handlers.cancel_state_handler import cancel_handler
+from bot.keyboards.reply.menu_keyboard import main_keyboard
+from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from bot.keyboards.inline.choose_date_period import choice_date_period_keyboards
 
 
-@dp.message_handler(commands="stats", state=None)
-@dp.message_handler(regexp="^(📊 Статистика)$")
 async def cm_stats(message: types.Message):
     await StatisticsFormState.name.set()
     await message.reply(
@@ -24,8 +19,7 @@ async def cm_stats(message: types.Message):
     )
 
 
-@dp.message_handler(state=StatisticsFormState.name, content_types=["text"])
-async def load_name(message: types.Message, state: FSMContext):
+async def stats_load_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = message.text.lower()
 
@@ -36,33 +30,29 @@ async def load_name(message: types.Message, state: FSMContext):
     await StatisticsFormState.next()
 
 
-@dp.callback_query_handler(
-    state=StatisticsFormState.choice_date_period, text_contains="choice"
-)
-async def choice_data_period(call: types.CallbackQuery, state: FSMContext):
+async def stats_choice_data_period(call: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["choice"] = call.data
 
         if data["choice"] == "choicePeriod":
-            await dp.bot.send_message(
-                call.from_user.id,
+            await call.answer(
+                # call.from_user.id,
                 "⌨ Введите период подсчёта статистики <b>(в днях)</b>",
-                reply_markup=await cancel_state_keyboard(),
+                # reply_markup=await cancel_state_keyboard(),
             )
         else:
-            await dp.bot.send_message(
-                call.from_user.id,
+            await call.answer(
+                # call.from_user.id,
                 "⌨ Введите дату подсчёта статистики\n\n"
                 "❗ Формат: <b>день.месяц.год</b>\n\n"
                 "Пример: <b><i>20.10.2022</i></b>",
-                reply_markup=await cancel_state_keyboard(),
+                # reply_markup=await cancel_state_keyboard(),
             )
 
     await StatisticsFormState.next()
 
 
-@dp.message_handler(state=StatisticsFormState.days, content_types=["text"])
-async def load_period(message: types.Message, state: FSMContext):
+async def stats_load_period(message: types.Message, state: FSMContext):
     analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
         date = await get_correct_date(data["choice"], message.text)
