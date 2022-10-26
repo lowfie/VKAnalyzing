@@ -17,8 +17,7 @@ from handlers.cancel_state_handler import cancel_handler
 async def cm_stats(message: types.Message):
     await ParseFormState.name.set()
     await message.reply(
-        "⌨ Введите название группы из ссылки\n\n"
-        "❗ Это может занять какое-то время, ожидайте...",
+        "⌨ Введите название группы из ссылки\n",
         reply_markup=await cancel_state_keyboard(),
     )
 
@@ -30,6 +29,8 @@ async def load_name(message: types.Message, state: FSMContext):
 
     if len(text.split()) == 1:
         group = text.split()[0]
+
+        await message.answer("❗ Это может занять какое-то время, ожидайте...")
 
         # Функция парсинга данных из группы
         is_parsing = await parser_vk.run_vk_parser(group)
