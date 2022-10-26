@@ -212,10 +212,8 @@ class VkParser:
                         ):
                             # подсчёт позитивных/негативных комментариев поста
                             if tone == "positive":
-                                tones_post["post_id"] = comment["post_id"]
                                 tones_post["positive_comments"] += 1
                             elif tone == "negative":
-                                tones_post["post_id"] = comment["post_id"]
                                 tones_post["negative_comments"] += 1
                             self.comments_metadata.append(comment_data)
                         else:
