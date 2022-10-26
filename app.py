@@ -1,23 +1,20 @@
 import asyncio
-
-from aiogram import executor
-from loader import dp
-
-from database.models import create_tables
-
-from loguru import logger
-
-from modules.tasks import schedule
-
 import handlers
+
+from loader import dp
+from loguru import logger
+from aiogram import executor
+from modules.tasks import schedule
+from database.exceptions import DBInitError
+from database.services import create_tables_if_not_exist
 
 
 async def on_startup(dispatcher):
     asyncio.create_task(schedule())
     try:
         logger.info("the bot has been successfully start")
-        create_tables()
-    except Exception as err:
+        create_tables_if_not_exist()
+    except DBInitError as err:
         logger.error(f"Ошибка инициализации БД: {err}")
 
 

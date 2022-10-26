@@ -1,16 +1,14 @@
-from aiogram.dispatcher import FSMContext
-from aiogram import types
 from loader import dp
-
-from .autoparse_state import AutoparseFormState
-
 from loguru import logger
-
-from database.services import GroupService
+from aiogram import types
 from database.models import Group
+from aiogram.dispatcher import FSMContext
+from database.services import GroupService
+from .autoparse_state import AutoparseFormState
 
 from keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
 from keyboards.reply.menu_keyboard import main_keyboard
+
 from handlers.cancel_state_handler import cancel_handler
 
 

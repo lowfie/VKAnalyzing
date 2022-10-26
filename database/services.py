@@ -1,9 +1,9 @@
-from loader import session
-
-from loguru import logger
-
 from typing import Any
-from loader import Base
+from loguru import logger
+from sqlalchemy import inspect
+from loader import session, engine, Base
+from database.exceptions import DBSaveError
+from database.models import Group, Post, Comment
 
 
 class GroupService:
@@ -18,7 +18,7 @@ class GroupService:
         session.bulk_insert_mappings(self.group, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -30,7 +30,7 @@ class GroupService:
         session.bulk_update_mappings(self.group, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -38,12 +38,12 @@ class GroupService:
         """
         Функция принимает название группы и отдаёт её ID
         """
-        group_id = (
-            session.query(self.group.group_id)
+        group = (
+            session.query(self.group)
             .filter(self.group.screen_name == screen_name)
             .first()
         )
-        group_id = group_id[0] if group_id else group_id
+        group_id = group.group_id if group is not None else None
         return group_id
 
     def set_autoparsing_group(self, group_name: str) -> bool | None:
@@ -68,7 +68,7 @@ class GroupService:
 
             try:
                 session.commit()
-            except Exception as err:
+            except DBSaveError as err:
                 logger.error(
                     f"Произошла ошибка при обновлении статуса авто-парсинга: {err}"
                 )
@@ -89,7 +89,7 @@ class PostService:
         session.bulk_insert_mappings(self.post, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -101,7 +101,7 @@ class PostService:
         session.bulk_update_mappings(self.post, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -128,7 +128,7 @@ class PostService:
             ).update(tone)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при обновлении тональности: {err}")
             session.rollback()
 
@@ -145,7 +145,7 @@ class CommentService:
         session.bulk_insert_mappings(self.comment, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
 
@@ -157,6 +157,19 @@ class CommentService:
         session.bulk_update_mappings(self.comment, input_data)
         try:
             session.commit()
-        except Exception as err:
+        except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
+
+
+def table_exist(table_name: str) -> bool:
+    return inspect(engine).has_table(table_name)
+
+
+def create_tables_if_not_exist() -> None:
+    """Автоматическое создание моделей при запуске"""
+    models = [Post, Comment, Group]
+    existing_tables = [table_exist(name.__tablename__) for name in models]
+    if not all(existing_tables):
+        Base.metadata.create_all(bind=engine)
+        logger.info("Таблицы созданы, так как их не было в базе данных!")

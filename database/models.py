@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, BigInteger, Text, Boolean, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-
 from loader import Base, engine
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, BigInteger, Text, Boolean, DateTime, ForeignKey
 
 
 class Group(Base):
@@ -13,6 +12,9 @@ class Group(Base):
     group_members = Column("members", Integer, default=0)
     autoparse = Column("is_autoparse", Boolean, default=False)
     post = relationship("Post", lazy="select")
+
+    def __repr__(self):
+        return f"<Group id={self.id} group_name={self.group_name}>"
 
 
 class Post(Base):
@@ -32,6 +34,9 @@ class Post(Base):
     date = Column("date", DateTime)
     comment = relationship("Comment", lazy="select")
 
+    def __repr__(self):
+        return f"<Post post_id={self.post_id} post_text={self.post_text[:20]}>"
+
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -40,6 +45,9 @@ class Comment(Base):
     post_id = Column(Integer, ForeignKey(Post.post_id), nullable=False)
     text = Column("text", Text)
     tone = Column("tone", Text)
+
+    def __repr__(self):
+        return f"<Comment comment_id={self.comment_id} comment_text={self.group_name}>"
 
 
 def create_tables() -> None:
