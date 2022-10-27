@@ -1,13 +1,14 @@
 from typing import Any
+
 from loguru import logger
-from sqlalchemy import inspect
-from loader import session, engine, Base
+
 from database.exceptions import DBSaveError
 from database.models import Group, Post, Comment
+from loader import session
 
 
 class GroupService:
-    def __init__(self, group: Base) -> None:
+    def __init__(self, group: Group) -> None:
         self.group = group
 
     def add_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -38,11 +39,7 @@ class GroupService:
         """
         Функция принимает название группы и отдаёт её ID
         """
-        group = (
-            session.query(self.group)
-            .filter(self.group.screen_name == screen_name)
-            .first()
-        )
+        group = session.query(self.group).filter(self.group.screen_name == screen_name).first()
         group_id = group.group_id if group is not None else None
         return group_id
 
@@ -55,30 +52,24 @@ class GroupService:
         group_id = self.get_group_id(group_name)
         if group_id:
             autoparse_status = (
-                not session.query(self.group.autoparse)
-                .filter(self.group.group_id == group_id)
-                .first()[0]
+                not session.query(self.group.autoparse).filter(self.group.group_id == group_id).first()[0]
             )
 
             column = {"autoparse": autoparse_status}
 
-            session.query(self.group).filter(
-                self.group.group_id == self.get_group_id(group_name)
-            ).update(column)
+            session.query(self.group).filter(self.group.group_id == self.get_group_id(group_name)).update(column)
 
             try:
                 session.commit()
             except DBSaveError as err:
-                logger.error(
-                    f"Произошла ошибка при обновлении статуса авто-парсинга: {err}"
-                )
+                logger.error(f"Произошла ошибка при обновлении статуса авто-парсинга: {err}")
                 session.rollback()
             return autoparse_status
         return None
 
 
 class PostService:
-    def __init__(self, post: Base) -> None:
+    def __init__(self, post: Post) -> None:
         self.post = post
 
     def add_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -110,22 +101,12 @@ class PostService:
         Функция принимает тон комментария и ID поста
         и обновляет эти параметры в бд
         """
-        positive_comment = {
-            "positive_comments": (
-                self.post.positive_comments + tones_post["positive_comments"]
-            )
-        }
-        negative_comment = {
-            "negative_comments": (
-                self.post.negative_comments + tones_post["negative_comments"]
-            )
-        }
+        positive_comment = {"positive_comments": (self.post.positive_comments + tones_post["positive_comments"])}
+        negative_comment = {"negative_comments": (self.post.negative_comments + tones_post["negative_comments"])}
         tones = [positive_comment, negative_comment]
 
         for tone in tones:
-            session.query(self.post).filter(
-                self.post.post_id == tones_post["post_id"]
-            ).update(tone)
+            session.query(self.post).filter(self.post.post_id == tones_post["post_id"]).update(tone)
         try:
             session.commit()
         except DBSaveError as err:
@@ -134,7 +115,7 @@ class PostService:
 
 
 class CommentService:
-    def __init__(self, comment: Base) -> None:
+    def __init__(self, comment: Comment) -> None:
         self.comment = comment
 
     def add_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -160,16 +141,3 @@ class CommentService:
         except DBSaveError as err:
             logger.error(f"Произошла ошибка при сохранении группы: {err}")
             session.rollback()
-
-
-def table_exist(table_name: str) -> bool:
-    return inspect(engine).has_table(table_name)
-
-
-def create_tables_if_not_exist() -> None:
-    """Автоматическое создание моделей при запуске"""
-    models = [Post, Comment, Group]
-    existing_tables = [table_exist(name.__tablename__) for name in models]
-    if not all(existing_tables):
-        Base.metadata.create_all(bind=engine)
-        logger.info("Таблицы созданы, так как их не было в базе данных!")

@@ -1,12 +1,11 @@
-from loguru import logger
 from aiogram import types
+from aiogram.dispatcher import FSMContext
+from loguru import logger
 
+from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from bot.keyboards.reply.menu_keyboard import main_keyboard
 from libs.vk_parser import VkParser
 from .parse_state import ParseFormState
-from aiogram.dispatcher import FSMContext
-
-from bot.keyboards.reply.menu_keyboard import main_keyboard
-from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
 
 
 async def cm_parse(message: types.Message):
@@ -31,9 +30,7 @@ async def parse_load_name(message: types.Message, state: FSMContext):
 
         if is_parsing:
             logger.info(f"Начался парсинг группы {group}")
-            await message.answer(
-                text="❕ Данные были успешно собраны", reply_markup=await main_keyboard()
-            )
+            await message.answer(text="❕ Данные были успешно собраны", reply_markup=await main_keyboard())
         else:
             await message.answer(
                 text=f"❗ Невозможно собрать данные группы <b>{group}</b>",

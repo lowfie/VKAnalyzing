@@ -1,5 +1,5 @@
-from dostoevsky.tokenization import RegexTokenizer
 from dostoevsky.models import FastTextSocialNetworkModel
+from dostoevsky.tokenization import RegexTokenizer
 
 
 class SentimentalAnalysisModel:

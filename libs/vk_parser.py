@@ -1,16 +1,15 @@
-import httpx
 import asyncio
-
-from typing import Any
-from loguru import logger
-from loader import session
 from datetime import datetime
-from settings.config import VK_TOKEN
+from typing import Any
+
+import httpx
+from loguru import logger
 
 from database.models import Post, Comment, Group
-from database import PostService, CommentService, GroupService
-
+from database.services import PostService, CommentService, GroupService
 from libs.ml_lib import SentimentalAnalysisModel
+from loader import session
+from settings.config import VK_TOKEN
 
 
 class VkParser:
@@ -51,9 +50,7 @@ class VkParser:
         try:
             get_group = httpx.get(self.groups_getGroup, params=params_get_group).json()["response"][0]
         except KeyError:
-            logger.warning(
-                "Ошибка парсинга группы (Ошибка get-запроса: невозможно собрать данные)"
-            )
+            logger.warning("Ошибка парсинга группы (Ошибка get-запроса: невозможно собрать данные)")
             return False
 
         params_group_members = {
@@ -62,9 +59,7 @@ class VkParser:
             "count": 0,
             "v": self.vk_version,
         }
-        get_group_members = httpx.get(
-            self.groups_getMembers, params=params_group_members
-        ).json()["response"]
+        get_group_members = httpx.get(self.groups_getMembers, params=params_group_members).json()["response"]
 
         group_data = {
             "group_id": get_group["id"],
@@ -74,15 +69,10 @@ class VkParser:
         }
 
         # Инициализация класса для сохранения в бд
-        service_group = GroupService(Group)
+        service_group = GroupService(Group())
 
         # Сохранение и обновление данных групп в бд
-        if (
-            session.query(Group)
-            .filter(Group.group_id == group_data["group_id"])
-            .first()
-            is None
-        ):
+        if session.query(Group).filter(Group.group_id == group_data["group_id"]).first() is None:
             # Формирование списка с данным для сбора постов
             self.group_metadata.append(group_data)
             service_group.add_all(self.group_metadata)
@@ -100,7 +90,7 @@ class VkParser:
         logger.info(f"Начался сбор постов")
 
         # Инициализация класса для сохранения в бд
-        service_post = PostService(Post)
+        service_post = PostService(Post())
         all_groups = self.group_metadata + self.group_update_metadata
         for group in all_groups:
             params = {
@@ -126,12 +116,7 @@ class VkParser:
                     "post_text": post["text"],
                     "date": datetime.fromtimestamp(post["date"]),
                 }
-                if (
-                    session.query(Post)
-                    .filter(Post.post_id == post_data["post_id"])
-                    .first()
-                    is None
-                ):
+                if session.query(Post).filter(Post.post_id == post_data["post_id"]).first() is None:
                     self.posts_metadata.append(post_data)
                 else:
                     self.posts_update_metadata.append(post_data)
@@ -163,8 +148,8 @@ class VkParser:
         logger.info(f"Начался сбор комментариев")
 
         # Инициализация класса для сохранения в бд
-        service_comment = CommentService(Comment)
-        service_post = PostService(Post)
+        service_comment = CommentService(Comment())
+        service_post = PostService(Post())
 
         # Перебор всех постов для получения комментариев
         all_posts = self.posts_metadata + self.posts_update_metadata
@@ -210,9 +195,7 @@ class VkParser:
 
                         # проверка на существование коммента в бд
                         if (
-                            session.query(Comment)
-                            .filter(Comment.comment_id == comment_data["comment_id"])
-                            .first()
+                            session.query(Comment).filter(Comment.comment_id == comment_data["comment_id"]).first()
                             is None
                         ):
                             # подсчёт позитивных/негативных комментариев поста

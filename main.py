@@ -1,11 +1,15 @@
 import asyncio
 
-from loader import dp
-from loguru import logger
+from aiogram import Bot, Dispatcher
 from aiogram import executor
-from libs.tasks import schedule
+from aiogram import types
+from loguru import logger
+
 from database.exceptions import DBInitError
-from database.services import create_tables_if_not_exist
+from libs.db_lib import create_tables_if_not_exist
+from libs.tasks import schedule
+from loader import redis_storage, register_bot_handlers
+from settings.config import BOT_TOKEN
 
 
 async def on_startup(dispatcher):
@@ -13,6 +17,7 @@ async def on_startup(dispatcher):
     try:
         logger.info("the bot has been successfully start")
         create_tables_if_not_exist()
+        register_bot_handlers(dispatcher)
     except DBInitError as err:
         logger.error(f"Ошибка инициализации БД: {err}")
 
@@ -23,6 +28,6 @@ async def on_shutdown(dispatcher):
 
 
 if __name__ == "__main__":
-    executor.start_polling(
-        dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown
-    )
+    bot = Bot(BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+    dp = Dispatcher(bot=bot, storage=redis_storage)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)

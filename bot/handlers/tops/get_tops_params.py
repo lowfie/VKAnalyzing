@@ -1,15 +1,16 @@
-from loguru import logger
-from aiogram import types
-from analytics import Analytics
-from .tops_state import TopsFormState
-from database.models import Group, Post
 from datetime import datetime, timedelta
+
+from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
+from loguru import logger
 
-from bot.keyboards.reply.menu_keyboard import main_keyboard
-from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from analytics.statistics import Analytics
 from bot.keyboards.inline.choose_date_period import choice_date_period_keyboards
+from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from bot.keyboards.reply.menu_keyboard import main_keyboard
+from database.models import Group, Post
+from .tops_state import TopsFormState
 
 
 async def cm_tops(message: types.Message):
@@ -55,7 +56,7 @@ async def tops_choice_data_period(call: types.CallbackQuery, state: FSMContext):
 
 
 async def tops_load_period(message: types.Message, state: FSMContext):
-    analysis = Analytics(group=Group, post=Post)
+    analysis = Analytics(group=Group(), post=Post())
     async with state.proxy() as data:
         date = await get_correct_date(data["choice"], message.text)
 
@@ -73,21 +74,10 @@ async def tops_load_period(message: types.Message, state: FSMContext):
         negative_post_list = analysis.get_top_stats(data, Post.negative_comments)
         popular_post_list = analysis.get_top_stats(data, Post.views)
 
-        if (
-            positive_post_list and negative_post_list and popular_post_list
-        ) is not None:
-            popular_urls = "\n".join(
-                f'{hlink(pop_post["number"], pop_post["url"])}'
-                for pop_post in popular_post_list
-            )
-            pos_urls = "\n".join(
-                f'{hlink(pos_post["number"], pos_post["url"])}'
-                for pos_post in positive_post_list
-            )
-            neg_urls = "\n".join(
-                f'{hlink(neg_post["number"], neg_post["url"])}'
-                for neg_post in negative_post_list
-            )
+        if (positive_post_list and negative_post_list and popular_post_list) is not None:
+            popular_urls = "\n".join(f'{hlink(pop_post["number"], pop_post["url"])}' for pop_post in popular_post_list)
+            pos_urls = "\n".join(f'{hlink(pos_post["number"], pos_post["url"])}' for pos_post in positive_post_list)
+            neg_urls = "\n".join(f'{hlink(neg_post["number"], neg_post["url"])}' for neg_post in negative_post_list)
 
             text = (
                 f"<b>— Топ постов</b>\n\n"

@@ -1,10 +1,11 @@
 import asyncio
-import aioschedule
 
+import aioschedule
 from loguru import logger
-from loader import session
+
 from database.models import Group
 from libs.vk_parser import VkParser
+from loader import session
 
 
 async def autoparse_vk():
@@ -15,9 +16,7 @@ async def autoparse_vk():
     В неё передаю параметр: группы
     """
     vk_parser = VkParser()
-    groups_autoparse = (
-        session.query(Group.screen_name).filter(Group.autoparse == "true").all()
-    )
+    groups_autoparse = session.query(Group.screen_name).filter(Group.autoparse == "true").all()
 
     for screen_name in groups_autoparse:
         logger.info(f"Автопарсинг группы {screen_name[0]} начался")

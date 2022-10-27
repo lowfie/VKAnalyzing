@@ -18,6 +18,4 @@ async def cmd_help(message: types.Message):
         "Пример ссылки: https://vk.com/<b>1owfie</b>\n"
         "В данном случае названием группы является часть <b>1owfie</b>\n"
     )
-    await message.answer(
-        text, reply_markup=await main_keyboard(), disable_web_page_preview=True
-    )
+    await message.answer(text, reply_markup=await main_keyboard(), disable_web_page_preview=True)

@@ -1,9 +1,12 @@
-from typing import Any
-from sqlalchemy import func
-from loader import session, Base
 from datetime import datetime, timedelta
-from database.services import GroupService
+from typing import Any
+
+from sqlalchemy import func
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+
+from database.models import Post, Group
+from database.services import GroupService
+from loader import session
 
 
 class Analytics:
@@ -12,7 +15,7 @@ class Analytics:
     И на их основе аналитика
     """
 
-    def __init__(self, group: Base, post: Base) -> None:
+    def __init__(self, group: Group, post: Post) -> None:
         self.group = group
         self.post = post
 
@@ -24,9 +27,7 @@ class Analytics:
         """
         service_group = GroupService(self.group)
         group_id = service_group.get_group_id(input_data["name"])
-        date_params = self.get_date_params(
-            input_data["choice"], input_data["date"], group_id
-        )
+        date_params = self.get_date_params(input_data["choice"], input_data["date"], group_id)
 
         if group_id:
             # Количество подписчиков группы
@@ -41,9 +42,7 @@ class Analytics:
                 session.query(func.count(self.post.post_id))
                 .filter(
                     self.post.group_id == group_id,
-                    self.post.date.between(
-                        date_params["from_date"], date_params["to_date"]
-                    ),
+                    self.post.date.between(date_params["from_date"], date_params["to_date"]),
                 )
                 .first()[0]
             )
@@ -53,9 +52,7 @@ class Analytics:
                 session.query(func.count(self.post.post_id))
                 .filter(
                     self.post.group_id == group_id,
-                    self.post.date.between(
-                        date_params["from_date"], date_params["to_date"]
-                    ),
+                    self.post.date.between(date_params["from_date"], date_params["to_date"]),
                     self.post.photo == "true",
                 )
                 .first()[0]
@@ -66,9 +63,7 @@ class Analytics:
                     session.query(func.sum(query_param))
                     .filter(
                         self.post.group_id == group_id,
-                        self.post.date.between(
-                            date_params["from_date"], date_params["to_date"]
-                        ),
+                        self.post.date.between(date_params["from_date"], date_params["to_date"]),
                     )
                     .first()[0]
                 )
@@ -80,11 +75,7 @@ class Analytics:
             reposts = get_sum_record(self.post.reposts)
 
             reactions = likes + comments + reposts
-            engagement_rate = float(
-                "{0:.2f}".format(
-                    (reactions / (date_params["days"] * group_members)) * 100
-                )
-            )
+            engagement_rate = float("{0:.2f}".format((reactions / (date_params["days"] * group_members)) * 100))
             count_user_er = int(engagement_rate / 100 * group_members)
 
             statistics = {
@@ -98,12 +89,10 @@ class Analytics:
                 "reposts": reposts,
                 "engagement_rate": engagement_rate,
                 "er_users": count_user_er,
-                "to_date": str(date_params["to_date"].replace(second=0, microsecond=0))[
+                "to_date": str(date_params["to_date"].replace(second=0, microsecond=0))[: date_params["line_slice"]],
+                "from_date": str(date_params["from_date"].replace(second=0, microsecond=0))[
                     : date_params["line_slice"]
                 ],
-                "from_date": str(
-                    date_params["from_date"].replace(second=0, microsecond=0)
-                )[: date_params["line_slice"]],
                 "date_last_post": date_params["date_last_post"],
             }
             if input_data["choice"] == "choicePeriod":
@@ -122,9 +111,7 @@ class Analytics:
         service_group = GroupService(self.group)
         group_id = service_group.get_group_id(input_data["name"])
         top_stats_url_list = []
-        date_params = self.get_date_params(
-            input_data["choice"], input_data["date"], group_id
-        )
+        date_params = self.get_date_params(input_data["choice"], input_data["date"], group_id)
 
         if group_id:
             max_values_record = (
@@ -132,9 +119,7 @@ class Analytics:
                 .distinct()
                 .filter(
                     self.post.group_id == group_id,
-                    self.post.date.between(
-                        date_params["from_date"], date_params["to_date"]
-                    ),
+                    self.post.date.between(date_params["from_date"], date_params["to_date"]),
                 )
                 .order_by(query_param.desc())
                 .limit(3)
@@ -148,9 +133,7 @@ class Analytics:
                     session.query(self.post)
                     .filter(
                         self.post.group_id == group_id,
-                        self.post.date.between(
-                            date_params["from_date"], date_params["to_date"]
-                        ),
+                        self.post.date.between(date_params["from_date"], date_params["to_date"]),
                         query_param == max_value_record[0],
                     )
                     .first()
@@ -167,12 +150,12 @@ class Analytics:
                 top_stat_url = {
                     "number": f"{text}",
                     "url": f"https://vk.com/{input_data['name']}?w=wall{post.owner_id}_{post.post_id}",
-                    "to_date": str(
-                        date_params["to_date"].replace(second=0, microsecond=0)
-                    )[: date_params["line_slice"]],
-                    "from_date": str(
-                        date_params["from_date"].replace(second=0, microsecond=0)
-                    )[: date_params["line_slice"]],
+                    "to_date": str(date_params["to_date"].replace(second=0, microsecond=0))[
+                        : date_params["line_slice"]
+                    ],
+                    "from_date": str(date_params["from_date"].replace(second=0, microsecond=0))[
+                        : date_params["line_slice"]
+                    ],
                     "date_last_post": date_params["date_last_post"],
                 }
                 if input_data["choice"] == "choicePeriod":
@@ -193,9 +176,7 @@ class Analytics:
         if choice == "choicePeriod":
             to_date = datetime.now().replace(microsecond=0)
             from_date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-            to_date_last_post = (
-                to_date_period.date if to_date_period is not None else to_date
-            )
+            to_date_last_post = to_date_period.date if to_date_period is not None else to_date
             days = (to_date - from_date).days
             line_slice = -3
         else:

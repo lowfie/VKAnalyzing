@@ -1,14 +1,15 @@
-from loguru import logger
-from aiogram import types
-from analytics import Analytics
-from database.models import Group, Post
 from datetime import datetime, timedelta
-from aiogram.dispatcher import FSMContext
-from .statistics_state import StatisticsFormState
 
-from bot.keyboards.reply.menu_keyboard import main_keyboard
-from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from aiogram import types
+from aiogram.dispatcher import FSMContext
+from loguru import logger
+
+from analytics.statistics import Analytics
 from bot.keyboards.inline.choose_date_period import choice_date_period_keyboards
+from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from bot.keyboards.reply.menu_keyboard import main_keyboard
+from database.models import Group, Post
+from .statistics_state import StatisticsFormState
 
 
 async def cm_stats(message: types.Message):
@@ -53,7 +54,7 @@ async def stats_choice_data_period(call: types.CallbackQuery, state: FSMContext)
 
 
 async def stats_load_period(message: types.Message, state: FSMContext):
-    analysis = Analytics(group=Group, post=Post)
+    analysis = Analytics(group=Group(), post=Post())
     async with state.proxy() as data:
         date = await get_correct_date(data["choice"], message.text)
 
@@ -92,14 +93,10 @@ async def stats_load_period(message: types.Message, state: FSMContext):
                 f'Период: <b>{statistics["from_date"]} — {statistics["to_date"]}</b>'
             )
         elif statistics is not None and statistics["count_post"] == 0:
-            text = (
-                f"❗ Невозможно собрать статистику за этот период\n\n"
-                f"Попробуйте указать период больше"
-            )
+            text = f"❗ Невозможно собрать статистику за этот период\n\n" f"Попробуйте указать период больше"
         else:
             text = (
-                f'❗ Группы <b>{data["name"]}</b> нету в базе\n\n'
-                f"Вы можете её добавить написать <code>/parse</code>"
+                f'❗ Группы <b>{data["name"]}</b> нету в базе\n\n' f"Вы можете её добавить написать <code>/parse</code>"
             )
 
         await message.answer(text=text, reply_markup=await main_keyboard())

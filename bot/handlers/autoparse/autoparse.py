@@ -1,12 +1,12 @@
-from loguru import logger
 from aiogram import types
-from database.models import Group
 from aiogram.dispatcher import FSMContext
-from database.services import GroupService
-from .autoparse_state import AutoparseFormState
+from loguru import logger
 
 from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
 from bot.keyboards.reply.menu_keyboard import main_keyboard
+from database.models import Group
+from database.services import GroupService
+from .autoparse_state import AutoparseFormState
 
 
 async def cm_autoparse(message: types.Message):
@@ -24,7 +24,7 @@ async def autoparse_load_name(message: types.Message, state: FSMContext):
 
     if len(text.split()) == 1:
         group = text.split()[0]
-        group_service = GroupService(Group)
+        group_service = GroupService(Group())
         autoparsing_status = group_service.set_autoparsing_group(group)
 
         if autoparsing_status is None:
