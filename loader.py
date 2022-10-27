@@ -1,3 +1,4 @@
+from aiogram import Bot, types, Dispatcher
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,6 +15,7 @@ from settings.config import (
     HOST_REDIS,
     PORT_REDIS,
     DATABASE_REDIS,
+    BOT_TOKEN,
 )
 
 # Создание сессии для коммуникации с бд
@@ -35,6 +37,9 @@ redis_storage = RedisStorage2(
     password=PASSWORD_REDIS,
     prefix=PREFIX_REDIS,
 )
+
+bot = Bot(BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+dp = Dispatcher(bot=bot, storage=redis_storage)
 
 
 # Подключение к апи телеграмм бота
