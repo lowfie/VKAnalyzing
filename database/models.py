@@ -15,7 +15,7 @@ class Group(Base):
     post = relationship("Post", lazy="select")
 
     def __repr__(self):
-        return f"<Group id={self.id} group_name={self.group_name}>"
+        return f"<Group id={self.group_id} group_name={self.group_name}>"
 
 
 class Post(Base):
@@ -48,7 +48,7 @@ class Comment(Base):
     tone = Column("tone", Text)
 
     def __repr__(self):
-        return f"<Comment comment_id={self.comment_id} comment_text={self.group_name}>"
+        return f"<Comment comment_id={self.comment_id} comment_text={self.text}>"
 
 
 def create_tables() -> None:
