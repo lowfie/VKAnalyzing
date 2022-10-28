@@ -69,7 +69,7 @@ class VkParser:
         }
 
         # Инициализация класса для сохранения в бд
-        service_group = GroupService(Group())
+        service_group = GroupService(Group)
 
         # Сохранение и обновление данных групп в бд
         if session.query(Group).filter(Group.group_id == group_data["group_id"]).first() is None:
@@ -90,7 +90,7 @@ class VkParser:
         logger.info(f"Начался сбор постов")
 
         # Инициализация класса для сохранения в бд
-        service_post = PostService(Post())
+        service_post = PostService(Post)
         all_groups = self.group_metadata + self.group_update_metadata
         for group in all_groups:
             params = {
@@ -148,8 +148,8 @@ class VkParser:
         logger.info(f"Начался сбор комментариев")
 
         # Инициализация класса для сохранения в бд
-        service_comment = CommentService(Comment())
-        service_post = PostService(Post())
+        service_comment = CommentService(Comment)
+        service_post = PostService(Post)
 
         # Перебор всех постов для получения комментариев
         all_posts = self.posts_metadata + self.posts_update_metadata
@@ -196,8 +196,7 @@ class VkParser:
                         # проверка на существование коммента в бд
                         if (
                             session.query(Comment).filter(Comment.comment_id == comment_data["comment_id"]).first()
-                            is None
-                        ):
+                        ) is None:
                             # подсчёт позитивных/негативных комментариев поста
                             if tone == "positive":
                                 tones_post["positive_comments"] += 1

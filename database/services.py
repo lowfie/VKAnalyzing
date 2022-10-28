@@ -3,12 +3,11 @@ from typing import Any
 from loguru import logger
 
 from database.exceptions import DBSaveError
-from database.models import Group, Post, Comment
-from loader import session
+from loader import session, Base
 
 
 class GroupService:
-    def __init__(self, group: Group) -> None:
+    def __init__(self, group:  Base) -> None:
         self.group = group
 
     def add_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -69,7 +68,7 @@ class GroupService:
 
 
 class PostService:
-    def __init__(self, post: Post) -> None:
+    def __init__(self, post: Base) -> None:
         self.post = post
 
     def add_all(self, input_data: list[dict[str, Any]]) -> None:
@@ -101,8 +100,12 @@ class PostService:
         Функция принимает тон комментария и ID поста
         и обновляет эти параметры в бд
         """
-        positive_comment = {"positive_comments": (self.post.positive_comments + tones_post["positive_comments"])}
-        negative_comment = {"negative_comments": (self.post.negative_comments + tones_post["negative_comments"])}
+        if not (self.post.negative_comments and self.post.positive_comments):
+            positive_comment = {"positive_comments": tones_post["positive_comments"]}
+            negative_comment = {"negative_comments": tones_post["negative_comments"]}
+        else:
+            positive_comment = {"positive_comments": (self.post.positive_comments + tones_post["positive_comments"])}
+            negative_comment = {"negative_comments": (self.post.negative_comments + tones_post["negative_comments"])}
         tones = [positive_comment, negative_comment]
 
         for tone in tones:
@@ -115,7 +118,7 @@ class PostService:
 
 
 class CommentService:
-    def __init__(self, comment: Comment) -> None:
+    def __init__(self, comment: Base) -> None:
         self.comment = comment
 
     def add_all(self, input_data: list[dict[str, Any]]) -> None:
