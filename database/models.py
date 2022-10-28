@@ -49,8 +49,3 @@ class Comment(Base):
 
     def __repr__(self):
         return f"<Comment comment_id={self.comment_id} comment_text={self.text}>"
-
-
-def create_tables() -> None:
-    """Автоматическое создание моделей при запуске"""
-    Base.metadata.create_all(bind=engine)
