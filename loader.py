@@ -1,5 +1,7 @@
 from aiogram import Bot, types, Dispatcher
+from aiogram.dispatcher.filters import Text
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -65,12 +67,14 @@ def register_bot_handlers(dispatcher):
     dispatcher.register_message_handler(cmd_help, commands="help")
 
     dispatcher.register_message_handler(cmd_help, regexp="^(❓ Помощь)$")
+
     dispatcher.register_message_handler(cancel_handler, state="*", commands=["cancel", "отмена"])
+    dispatcher.register_message_handler(cancel_handler, Text(equals=["cancel", "отмена"], ignore_case=True), state="*")
 
     dispatcher.register_message_handler(cm_tops, commands="tops", state=None)
     dispatcher.register_message_handler(cm_tops, regexp="^(📈 Анализ постов)$")
     dispatcher.register_message_handler(tops_load_name, state=TopsFormState.name, content_types=["text"])
-    dispatcher.callback_query_handler(
+    dispatcher.register_callback_query_handler(
         tops_choice_data_period, state=TopsFormState.choice_date_period, text_contains="choice"
     )
     dispatcher.register_message_handler(tops_load_period, state=TopsFormState.days, content_types=["text"])
@@ -78,7 +82,7 @@ def register_bot_handlers(dispatcher):
     dispatcher.register_message_handler(cm_stats, commands="stats", state=None)
     dispatcher.register_message_handler(cm_stats, regexp="^(📊 Статистика)$")
     dispatcher.register_message_handler(stats_load_name, state=StatisticsFormState.name, content_types=["text"])
-    dispatcher.callback_query_handler(
+    dispatcher.register_callback_query_handler(
         stats_choice_data_period, state=StatisticsFormState.choice_date_period, text_contains="choice"
     )
     dispatcher.register_message_handler(stats_load_period, state=StatisticsFormState.days, content_types=["text"])
