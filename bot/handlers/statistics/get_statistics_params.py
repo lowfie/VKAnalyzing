@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loguru import logger
+from loader import dp
 
 from analytics.statistics import Analytics
 from bot.keyboards.inline.choose_date_period import choice_date_period_keyboards
@@ -36,18 +37,18 @@ async def stats_choice_data_period(call: types.CallbackQuery, state: FSMContext)
         data["choice"] = call.data
 
         if data["choice"] == "choicePeriod":
-            await call.answer(
-                # call.from_user.id,
+            await dp.bot.send_message(
+                call.from_user.id,
                 "⌨ Введите период подсчёта статистики <b>(в днях)</b>",
-                # reply_markup=await cancel_state_keyboard(),
+                reply_markup=await cancel_state_keyboard(),
             )
         else:
-            await call.answer(
-                # call.from_user.id,
+            await dp.bot.send_message(
+                call.from_user.id,
                 "⌨ Введите дату подсчёта статистики\n\n"
                 "❗ Формат: <b>день.месяц.год</b>\n\n"
                 "Пример: <b><i>20.10.2022</i></b>",
-                # reply_markup=await cancel_state_keyboard(),
+                reply_markup=await cancel_state_keyboard(),
             )
 
     await StatisticsFormState.next()
