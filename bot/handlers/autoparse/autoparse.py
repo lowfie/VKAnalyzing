@@ -24,7 +24,7 @@ async def autoparse_load_name(message: types.Message, state: FSMContext):
 
     if len(text.split()) == 1:
         group = text.split()[0]
-        group_service = GroupService(Group())
+        group_service = GroupService(Group)
         autoparsing_status = group_service.set_autoparsing_group(group)
 
         if autoparsing_status is None:

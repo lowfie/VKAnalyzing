@@ -55,7 +55,7 @@ async def stats_choice_data_period(call: types.CallbackQuery, state: FSMContext)
 
 
 async def stats_load_period(message: types.Message, state: FSMContext):
-    analysis = Analytics(group=Group(), post=Post())
+    analysis = Analytics(group=Group, post=Post)
     async with state.proxy() as data:
         date = await get_correct_date(data["choice"], message.text)
 

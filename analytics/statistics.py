@@ -4,9 +4,8 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from database.models import Post, Group
 from database.services import GroupService
-from loader import session
+from loader import session, Base
 
 
 class Analytics:
@@ -15,7 +14,7 @@ class Analytics:
     И на их основе аналитика
     """
 
-    def __init__(self, group: Group, post: Post) -> None:
+    def __init__(self, group: Base, post: Base) -> None:
         self.group = group
         self.post = post
 
