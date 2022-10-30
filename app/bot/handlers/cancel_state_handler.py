@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loguru import logger
 
-from bot.keyboards.reply.menu_keyboard import main_keyboard
+from app.bot.keyboards.reply.menu_keyboard import main_keyboard
 
 
 async def cancel_handler(message: types.Message, state: FSMContext):

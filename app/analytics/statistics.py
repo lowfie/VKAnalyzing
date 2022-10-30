@@ -4,8 +4,8 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-from database.services import GroupService
-from loader import session, Base
+from app.database.services import GroupService
+from app.loader import session, Base
 
 
 class Analytics:

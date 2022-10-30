@@ -1,6 +1,6 @@
 from aiogram import types
 
-from bot.keyboards.reply.menu_keyboard import main_keyboard
+from app.bot.keyboards.reply.menu_keyboard import main_keyboard
 
 
 async def cmd_help(message: types.Message):

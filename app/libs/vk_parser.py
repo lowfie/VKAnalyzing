@@ -5,11 +5,11 @@ from typing import Any
 import httpx
 from loguru import logger
 
-from database.models import Post, Comment, Group
-from database.services import PostService, CommentService, GroupService
-from libs.ml_lib import SentimentalAnalysisModel
-from loader import session
-from settings.config import VK_TOKEN
+from app.database.models import Post, Comment, Group
+from app.database.services import PostService, CommentService, GroupService
+from app.libs.ml_lib import SentimentalAnalysisModel
+from app.loader import session
+from app.settings.config import VK_TOKEN
 
 
 class VkParser:

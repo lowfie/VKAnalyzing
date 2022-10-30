@@ -3,14 +3,15 @@ import asyncio
 from aiogram import executor
 from loguru import logger
 
-from database.exceptions import DBInitError
-from libs.db_lib import create_tables_if_not_exist
-from libs.tasks import schedule
-from loader import dp, register_bot_handlers
+from app.libs.db_lib import create_tables_if_not_exist
+from app.libs.tasks import schedule
+from app.database.exceptions import DBInitError
+from app.loader import dp, register_bot_handlers
 
 
 async def on_startup(dispatcher):
     asyncio.create_task(schedule())
+    register_bot_handlers(dispatcher)
     try:
         logger.info("the bot has been successfully start")
         create_tables_if_not_exist()
@@ -24,5 +25,4 @@ async def on_shutdown(dispatcher):
 
 
 if __name__ == "__main__":
-    register_bot_handlers(dp)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)

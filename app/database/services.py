@@ -2,8 +2,8 @@ from typing import Any
 
 from loguru import logger
 
-from database.exceptions import DBSaveError
-from loader import session, Base
+from app.database.exceptions import DBSaveError
+from app.loader import session, Base
 
 
 class GroupService:

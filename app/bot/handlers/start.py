@@ -1,7 +1,7 @@
 from aiogram import types
 from loguru import logger
 
-from bot.keyboards.reply.menu_keyboard import main_keyboard
+from app.bot.keyboards.reply.menu_keyboard import main_keyboard
 
 
 async def bot_start(message: types.Message):

@@ -3,14 +3,14 @@ from datetime import datetime, timedelta
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
-from loader import dp
+from app.loader import dp
 from loguru import logger
 
-from analytics.statistics import Analytics
-from bot.keyboards.inline.choose_date_period import choice_date_period_keyboards
-from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
-from bot.keyboards.reply.menu_keyboard import main_keyboard
-from database.models import Group, Post
+from app.analytics.statistics import Analytics
+from app.bot.keyboards.inline.choose_date_period import choice_date_period_keyboards
+from app.bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from app.bot.keyboards.reply.menu_keyboard import main_keyboard
+from app.database.models import Group, Post
 from .tops_state import TopsFormState
 
 

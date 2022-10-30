@@ -2,10 +2,10 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from loguru import logger
 
-from bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
-from bot.keyboards.reply.menu_keyboard import main_keyboard
-from database.models import Group
-from database.services import GroupService
+from app.bot.keyboards.reply.cancel_state_keyboard import cancel_state_keyboard
+from app.bot.keyboards.reply.menu_keyboard import main_keyboard
+from app.database.models import Group
+from app.database.services import GroupService
 from .autoparse_state import AutoparseFormState
 
 

@@ -1,8 +1,8 @@
 from loguru import logger
 from sqlalchemy import inspect
 
-from database.models import Post, Comment, Group
-from loader import engine, Base
+from app.database.models import Post, Comment, Group
+from app.loader import engine, Base
 
 
 def table_exist(table_name: str) -> bool:
