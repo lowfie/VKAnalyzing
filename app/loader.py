@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from settings.config import (
+from app.settings.config import (
     USER_POSTGRES,
     PASSWORD_POSTGRES,
     HOST_POSTGRES,
@@ -46,22 +46,22 @@ dp = Dispatcher(bot=bot, storage=redis_storage)
 
 # Подключение к апи телеграмм бота
 def register_bot_handlers(dispatcher):
-    from bot.handlers.autoparse.autoparse import cm_autoparse, autoparse_load_name
-    from bot.handlers.autoparse.autoparse_state import AutoparseFormState
-    from bot.handlers.cancel_state_handler import cancel_handler
-    from bot.handlers.help import cmd_help
-    from bot.handlers.parse.parse import cm_parse, parse_load_name
-    from bot.handlers.parse.parse_state import ParseFormState
-    from bot.handlers.start import bot_start
-    from bot.handlers.statistics.get_statistics_params import (
+    from app.bot.handlers.autoparse.autoparse import cm_autoparse, autoparse_load_name
+    from app.bot.handlers.autoparse.autoparse_state import AutoparseFormState
+    from app.bot.handlers.cancel_state_handler import cancel_handler
+    from app.bot.handlers.help import cmd_help
+    from app.bot.handlers.parse.parse import cm_parse, parse_load_name
+    from app.bot.handlers.parse.parse_state import ParseFormState
+    from app.bot.handlers.start import bot_start
+    from app.bot.handlers.statistics.get_statistics_params import (
         cm_stats,
         stats_load_name,
         stats_choice_data_period,
         stats_load_period,
     )
-    from bot.handlers.statistics.statistics_state import StatisticsFormState
-    from bot.handlers.tops.get_tops_params import cm_tops, tops_load_name, tops_choice_data_period, tops_load_period
-    from bot.handlers.tops.tops_state import TopsFormState
+    from app.bot.handlers.statistics.statistics_state import StatisticsFormState
+    from app.bot.handlers.tops.get_tops_params import cm_tops, tops_load_name, tops_choice_data_period, tops_load_period
+    from app.bot.handlers.tops.tops_state import TopsFormState
 
     dispatcher.register_message_handler(bot_start, commands="start")
     dispatcher.register_message_handler(cmd_help, commands="help")
