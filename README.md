@@ -22,6 +22,7 @@ python -m dostoevsky download fasttext-social-network-model
 Если у вас Windows, то возможны проблемы с установкой FastText 
 - **Можете найти FastText [*здесь*](https://www.lfd.uci.edu/~gohlke/pythonlibs/)**
 
+Базы данных:
 - Запустите (брокер) Redis для работы FSM в aiogram
 - Также (хранилище) PostgreSQL для сбора данных:
 ```
