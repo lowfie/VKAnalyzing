@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  bot:
+    container_name: vk_analyzer
+    image: vk_analyzer:latest
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - "vk-analyzer-net"
+    depends_on:
+      - "postgres"
+      - "redis"
+    restart: always
+
+  postgres:
+    image: postgres:14.5
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: "${DATABASE_POSTGRES}"
+      POSTGRES_USER: "${USER_POSTGRES}"
+      POSTGRES_PASSWORD: "${PASSWORD_POSTGRES}"
+    ports:
+      - "${PORT_POSTGRES}:${PORT_POSTGRES}"
+    networks:
+      - "vk-analyzer-net"
+
+  redis:
+    image: redis:7.0.5
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${PORT_REDIS}:${PORT_REDIS}"
+    networks:
+      - "vk-analyzer-net"
+
+networks:
+  vk-analyzer-net:
+    driver: bridge
+    name: vk-analyzer-net

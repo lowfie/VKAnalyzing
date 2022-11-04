@@ -22,8 +22,9 @@ python -m dostoevsky download fasttext-social-network-model
 Если у вас Windows, то возможны проблемы с установкой FastText 
 - **Можете найти FastText [*здесь*](https://www.lfd.uci.edu/~gohlke/pythonlibs/)**
 
-Запустите (брокер) Redis для работы FSM в aiogram
-Также (хранилище) PostgreSQL для сбора данных:
+Базы данных:
+- Запустите (брокер) Redis для работы FSM в aiogram
+- Также (хранилище) PostgreSQL для сбора данных:
 ```
 docker run -p 6379:6379 -d redis
 docker run -p 5432:5432 -e POSTGRES_PASSWORD=123 -d postgres
@@ -49,6 +50,6 @@ DATABASE_REDIS=0
 
 ## Дополнительные источники
 - **Инструкция для получения VK_TOKEN [*здесь*](https://dvmn.org/encyclopedia/qna/63/kak-poluchit-token-polzovatelja-dlja-vkontakte/)**
-- **Получить токен на VK_TOKEN [*здесь*](https://dev.vk.com/)**
+- **Получить VK_TOKEN [*здесь*](https://dev.vk.com/)**
 - **Инструкция для получения TELEGRAM_TOKEN [*здесь*](https://web7.pro/kak-poluchit-token-bota-telegram-api/)**
 

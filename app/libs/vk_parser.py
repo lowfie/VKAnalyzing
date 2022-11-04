@@ -22,14 +22,6 @@ class VkParser:
         self.groups_getMembers = self.url + "groups.getMembers"
         self.vk_version = 5.131
 
-        # Объекты для базы данных
-        self.group_metadata: list[dict[str, Any]] = []
-        self.group_update_metadata: list[dict[str, Any]] = []
-        self.posts_metadata: list[dict[str, Any]] = []
-        self.posts_update_metadata: list[dict[str, Any]] = []
-        self.comments_metadata: list[dict[str, Any]] = []
-        self.comments_update_metadata: list[dict[str, Any]] = []
-
         # Инициализация модели нейросети для анализа тональности текста
         self.sentiment_model = SentimentalAnalysisModel()
 
@@ -40,6 +32,10 @@ class VkParser:
         И комментариев
         """
         logger.info(f"Начался сбор групп")
+
+        # Списки для добавления и обновления групп в базе данных
+        self.group_metadata: list[dict[str, Any]] = []
+        self.group_update_metadata: list[dict[str, Any]] = []
 
         params_get_group = {
             "group_id": group,
@@ -89,6 +85,10 @@ class VkParser:
         """
         logger.info(f"Начался сбор постов")
 
+        # Списки для добавления и обновления постов в базе данных
+        self.posts_metadata: list[dict[str, Any]] = []
+        self.posts_update_metadata: list[dict[str, Any]] = []
+
         # Инициализация класса для сохранения в бд
         service_post = PostService(Post)
         all_groups = self.group_metadata + self.group_update_metadata
@@ -132,6 +132,7 @@ class VkParser:
         """
 
         # функция возвращает список с методами для получения комментариев
+        # Методы пишутся на языке VKScript (Документация VK)
         def getcomments_methods(posts):
             execute_methods = ""
             methods = []
@@ -146,6 +147,10 @@ class VkParser:
             return methods
 
         logger.info(f"Начался сбор комментариев")
+
+        # Списки для добавления и обновления комментариев в базе данных
+        self.comments_metadata: list[dict[str, Any]] = []
+        self.comments_update_metadata: list[dict[str, Any]] = []
 
         # Инициализация класса для сохранения в бд
         service_comment = CommentService(Comment)
