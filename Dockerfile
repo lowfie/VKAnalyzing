@@ -4,5 +4,6 @@ COPY . /VkAnalyzing
 WORKDIR /VkAnalyzing
 
 RUN pip install --upgrade pip &&  pip install -r requirements.txt
+RUN python -m dostoevsky download fasttext-social-network-model
 
-ENTRYPOINT ["python3", "main.py"]
+CMD ["python3", "main.py"]
