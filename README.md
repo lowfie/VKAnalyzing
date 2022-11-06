@@ -2,8 +2,6 @@
 
 Удобный аналитический бот, который поможет мониторить группы ВК, следить за реакцией пользователей и статистикой
 
-- **Отдельная благодарность моему куратору за помощь - [*куратор*](https://github.com/n05tr0m0)**
-
 ## Вы сможете
 - Собирать данные группы одной командой 
 - Отслеживать статистику по периоду времени
@@ -39,13 +37,13 @@ BOT_TOKEN=telegram_api_token
 
 USER_POSTGRES=postgres
 PASSWORD_POSTGRES=123
-HOST_POSTGRES=localhost
+HOST_POSTGRES=postgres
 PORT_POSTGRES=5432
 DATABASE_POSTGRES=postgres
 
 PREFIX_REDIS=state_aiogram
 PASSWORD_REDIS=
-HOST_REDIS=localhost
+HOST_REDIS=postgres
 PORT_REDIS=6379
 DATABASE_REDIS=0
 ```
@@ -55,3 +53,4 @@ DATABASE_REDIS=0
 - **Получить VK_TOKEN [*здесь*](https://dev.vk.com/)**
 - **Инструкция для получения TELEGRAM_TOKEN [*здесь*](https://web7.pro/kak-poluchit-token-bota-telegram-api/)**
 
+**Отдельная благодарность моему куратору за помощь - [*куратор*](https://github.com/n05tr0m0)**
