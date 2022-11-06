@@ -53,5 +53,4 @@ DATABASE_REDIS=0
 - **Получить VK_TOKEN [*здесь*](https://dev.vk.com/)**
 - **Инструкция для получения TELEGRAM_TOKEN [*здесь*](https://web7.pro/kak-poluchit-token-bota-telegram-api/)**
 
-
-- **Отдельная благодарность моему куратору за помощь - [*куратор*](https://github.com/n05tr0m0)**
+**Отдельная благодарность моему куратору за помощь - [*куратор*](https://github.com/n05tr0m0)**
