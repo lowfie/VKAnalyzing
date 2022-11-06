@@ -64,8 +64,8 @@ def register_bot_handlers(dispatcher):
     from app.bot.handlers.tops.tops_state import TopsFormState
 
     dispatcher.register_message_handler(bot_start, commands="start")
-    dispatcher.register_message_handler(cmd_help, commands="help")
 
+    dispatcher.register_message_handler(cmd_help, commands="help")
     dispatcher.register_message_handler(cmd_help, regexp="^(❓ Помощь)$")
 
     dispatcher.register_message_handler(cancel_handler, state="*", commands=["cancel", "отмена"])

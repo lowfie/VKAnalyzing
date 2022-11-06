@@ -157,8 +157,8 @@ class VkParser:
         service_post = PostService(Post)
 
         # Перебор всех постов для получения комментариев
-        all_posts = self.posts_metadata + self.posts_update_metadata
-        codes = getcomments_methods(all_posts)
+        posts = self.posts_metadata + self.posts_update_metadata
+        codes = getcomments_methods(posts)
 
         # Итерация методов поста для общего парсинга
         for num, code in enumerate(codes, start=1):
