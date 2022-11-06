@@ -75,7 +75,7 @@ class VkParser:
         else:
             # Формирование списка с данным для обновления постов
             self.group_update_metadata.append(group_data)
-            service_group.update_all(self.group_metadata)
+            service_group.update_all(self.group_update_metadata)
         return True
 
     async def get_posts(self) -> None:
@@ -91,8 +91,8 @@ class VkParser:
 
         # Инициализация класса для сохранения в бд
         service_post = PostService(Post)
-        all_groups = self.group_metadata + self.group_update_metadata
-        for group in all_groups:
+        groups = self.group_metadata + self.group_update_metadata
+        for group in groups:
             params = {
                 "domain": group["screen_name"],
                 "count": 60,
