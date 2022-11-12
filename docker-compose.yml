@@ -27,6 +27,11 @@ services:
       POSTGRES_PASSWORD: "${PASSWORD_POSTGRES}"
     ports:
       - "${PORT_POSTGRES}:${PORT_POSTGRES}"
+    healthcheck:
+            test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+            timeout: 45s
+            interval: 10s
+            retries: 10
     networks:
       - "vk-analyzer-net"
 
@@ -37,6 +42,11 @@ services:
       - .env
     ports:
       - "${PORT_REDIS}:${PORT_REDIS}"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
     networks:
       - "vk-analyzer-net"
 
